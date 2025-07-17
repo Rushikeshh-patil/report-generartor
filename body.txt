@@ -1,0 +1,241 @@
+<body>
+
+    <!-- Cover Page -->
+    <div class="cover-page">
+        <div class="cover-content">
+            <img src="coverpage.png" alt="SC Engineers, a Legence company" class="cover-logo">
+            <h1>Central Energy Plant (CEP) Evaluation Report</h1>
+            <p class="project-number">SC PROJECT NO. 25120</p>
+            <div class="client-info">
+                <p>Prepared for:</p>
+                <p><strong>[Client Name/Organization]</strong></p>
+                <p>[Client Address]</p>
+            </div>
+            <div class="prepared-by">
+                <p>Prepared by:</p>
+                <p><strong>SC Engineers, a Legence company</strong></p>
+                <p>[Company Address]</p>
+                <p>July 16, 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Content -->
+    <div class="container">
+        <h1 class="new-page">1.0 Executive Summary</h1>
+        <h2>1.1 Purpose and Scope of Work</h2>
+        <p>The objective of this report is to present a comprehensive evaluation of the existing Central Energy Plant's (CEP) operational capacity and physical condition. The scope of this assessment is to determine the plant's ability to reliably serve the existing thermal loads of Tower 1 and Tower 2, in addition to the projected loads from the new Tower 3 and the permanent integration of the Browning Building. This report furnishes a detailed system analysis and recommends a strategic path forward for requisite plant upgrades to accommodate the campus's immediate and future requirements.</p>
+
+        <h2>1.2 Key Findings</h2>
+        <p>The principal finding of this evaluation is that the existing CEP exhibits a <b>substantial cooling capacity deficit</b> relative to the projected future demand. Based on as-built documentation, the total projected cooling load for the campus is calculated to be <b>5,580 Tons</b>, whereas the plant's current total installed capacity is 3,550 Tons. This results in a capacity shortfall of <b>2,030 Tons</b>, which indicates that the plant, in its current configuration, cannot reliably support the planned campus expansion. The existing steam heating system, conversely, possesses sufficient capacity to meet all projected loads.</p>
+
+        <h2>1.3 Summary of Recommendations</h2>
+        <p>Following a systematic evaluation of multiple strategic alternatives, this report recommends proceeding with a structured expansion of the existing Central Energy Plant. The proposed solution involves upgrading the 700-ton chiller to a new 1350-ton unit, constructing a new chiller annex to accommodate a new 1350-ton chiller with provisions for a future unit, and installing two new cooling towers. This course of action, referred to as <b>Option B: CEP Expansion with Chiller Annex</b>, was selected as it comprehensively addresses the identified capacity deficit while providing the necessary reliability and the greatest flexibility for long-term campus development, including a potential future Tower IV.</p>
+        
+        <h2>1.4 Authorization</h2>
+        <p>This evaluation was authorized under [Insert Contract Number or Authorization Document].</p>
+
+        <h1 class="new-page">2.0 Introduction</h1>
+        <h2>2.1 Problem Statement</h2>
+        <p>The medical campus is currently engaged in a period of substantial development, which includes the construction of Tower 3 and the permanent integration of the Browning Building into the central utility services. These new facilities will impose considerable new thermal loads upon the CEP. A preliminary analysis indicated that the plant's existing capacity, particularly for chilled water generation, is insufficient to meet the total projected demand, thereby creating a tangible risk of service interruption and constraining future institutional growth.</p>
+        
+        <h2>2.2 Project Goals and Objectives</h2>
+        <p>The primary goal of this project is to formulate a cost-effective and durable solution for the central plant. The key objectives are as follows:</p>
+        <ul>
+            <li>To ensure reliable N+1 utility service for all connected buildings.</li>
+            <li>To determine the required plant capacity for the fully developed campus with precision.</li>
+            <li>To evaluate the condition of existing plant infrastructure and equipment.</li>
+            <li>To analyze a range of upgrade and expansion alternatives.</li>
+            <li>To provide a clear, actionable recommendation that is in alignment with the long-term campus master plan.</li>
+        </ul>
+
+        <h1 class="new-page">3.0 Existing Conditions Assessment</h1>
+        <h2>3.1 HVAC and Steam Systems</h2>
+        <p>The Central Energy Plant contains the primary mechanical equipment for campus heating, ventilation, and air conditioning.</p>
+        
+        <h3>3.1.1 Plant Capacity Summary</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>System</th>
+                    <th>(E) QTY</th>
+                    <th>Capacity</th>
+                    <th>Desired Redundancy</th>
+                    <th>Total Capacity</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Chillers</td>
+                    <td>4</td>
+                    <td>(3) 1350 Tons, (1) 700 Tons</td>
+                    <td>N+1</td>
+                    <td>3,550 Tons</td>
+                </tr>
+                <tr>
+                    <td>Cooling Towers</td>
+                    <td>5</td>
+                    <td>(3) 1055 CT Tons, (2) 1100 CT Tons</td>
+                    <td>N+1</td>
+                    <td>5,365 CT Tons</td>
+                </tr>
+                <tr>
+                    <td>Steam Boilers</td>
+                    <td>3</td>
+                    <td>500 HP Boilers</td>
+                    <td>N+1</td>
+                    <td>50,250 MBH</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>3.4 Building Load Assessment</h2>
+        <p>The following table summarizes building thermal loads based on as-built documentation. Columns for actual peak loads, which are to be determined from BMS trend data, are included for subsequent analysis.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Building</th>
+                    <th>As-Built Cooling Load (Tons)</th>
+                    <th>Trended Cooling Load (Tons)</th>
+                    <th>As-Built Heating Load (MBH)</th>
+                    <th>Trended Heating Load (MBH)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Tower 1</td>
+                    <td>1,380</td>
+                    <td>[TBD from BMS]</td>
+                    <td>10,200</td>
+                    <td>[TBD from BMS]</td>
+                </tr>
+                <tr>
+                    <td>Tower 2</td>
+                    <td>1,350</td>
+                    <td>[TBD from BMS]</td>
+                    <td>9,500</td>
+                    <td>[TBD from BMS]</td>
+                </tr>
+                <tr>
+                    <td>Browning Building</td>
+                    <td>1,550</td>
+                    <td>[TBD from BMS]</td>
+                    <td>6,300</td>
+                    <td>[TBD from BMS]</td>
+                </tr>
+                <tr>
+                    <td><b>Current Total</b></td>
+                    <td><b>4,280</b></td>
+                    <td><b>[TBD]</b></td>
+                    <td><b>26,000</b></td>
+                    <td><b>[TBD]</b></td>
+                </tr>
+                 <tr>
+                    <td>Tower 3 (Projected)</td>
+                    <td>1,300</td>
+                    <td>N/A</td>
+                    <td>10,000</td>
+                    <td>N/A</td>
+                </tr>
+                <tr>
+                    <td><b>Total Projected</b></td>
+                    <td><b>5,580</b></td>
+                    <td><b>[TBD]</b></td>
+                    <td><b>36,000</b></td>
+                    <td><b>[TBD]</b></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h1 class="new-page">4.0 System Analysis</h1>
+        <h2>4.1 Capacity Analysis</h2>
+        <p>The most critical aspect of this analysis is the comparison of the plant's firm capacity against the projected peak load. Firm capacity is defined as the reliable output available with the largest single component out of service for maintenance or in the event of a failure.</p>
+        
+        <h3>4.1.1 Cooling Capacity Deficit</h3>
+        <p>The total projected cooling load is <b>5,580 Tons</b>. The plant's total installed capacity is 3,550 Tons. For an N+1 redundancy configuration, the largest chiller (1350 Tons) must be considered a standby unit, which leaves a firm capacity of only 2,200 Tons. This firm capacity represents less than half of the projected demand, indicating a <b>critical shortfall in cooling generation</b>.</p>
+
+        <h1 class="new-page">5.0 Recommendations and Proposed Solutions</h1>
+        <h2>5.1 Development of Strategic Options</h2>
+        <p>To address the <b>substantial cooling capacity deficit</b>, a range of strategic options was developed and systematically evaluated. The process commenced with the consideration of broad concepts involving decentralized plants and was progressively narrowed based on stakeholder input and technical feasibility to a final, preferred solution focused on expanding the existing Central Energy Plant.</p>
+
+        <h2>5.2 Initial Concepts: Decentralized Approach</h2>
+        <p>Early conceptualization identified several strategies that involved the construction of new, separate mechanical facilities. These were ultimately discarded in favor of a centralized approach.</p>
+        
+        <h3>Initial Option 1: New Mechanical Building for New Loads</h3>
+        <figure>
+            <img src="option_decentralized_1.png" alt="Conceptual Diagram for Decentralized Option 1">
+            <figcaption>Figure 1: Concept for a new, separate mechanical building to serve new loads.</figcaption>
+        </figure>
+
+        <h3>Initial Option 2: Dedicated Plant for Browning</h3>
+        <figure>
+            <img src="option_decentralized_2.png" alt="Conceptual Diagram for Decentralized Option 2">
+            <figcaption>Figure 2: Concept for a dedicated plant to serve the Browning building and future Tower IV.</figcaption>
+        </figure>
+
+        <h2>5.3 Finalist Options for CEP Expansion</h2>
+        <p>With the evaluation focused on expanding the existing CEP, two finalist options were developed for detailed consideration:</p>
+
+        <h3>5.3.1 Option A: Internal CEP Expansion</h3>
+        <p>This option proposed the integration of all new equipment within or immediately adjacent to the existing CEP footprint. The scope of work included: (1) upgrading the 700-ton chiller to a 1350-ton unit, (2) adding two new cooling towers, and (3) installing a fifth 1350-ton chiller within the existing CEP building.</p>
+        <figure>
+            <img src="option_internal_expansion.png" alt="Conceptual Diagram for Internal Expansion Option">
+            <figcaption>Figure 3: Conceptual layout for Option A, showing internal expansion within the existing plant.</figcaption>
+        </figure>
+
+        <h3>5.3.2 Option B: CEP Expansion with Chiller Annex</h3>
+        <p>This option proposes a more strategic expansion. The scope of work includes: (1) upgrading the 700-ton chiller to a 1350-ton unit, (2) adding two new cooling towers, and (3) constructing a new, dedicated chiller room (annex) adjacent to the CEP. This annex would house a new 1350-ton chiller and, critically, include planned space for a future chiller.</p>
+        <figure>
+            <img src="option_annex.png" alt="Conceptual Diagram for Option B: CEP Expansion with Chiller Annex">
+            <figcaption>Figure 4: Conceptual layout for the recommended Option B, showing the new chiller annex.</figcaption>
+        </figure>
+
+        <h2>5.4 Comparison of Finalist Options</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Option A: Internal Expansion</th>
+                    <th>Option B: CEP Expansion with Annex</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Future Capacity (Tower IV)</td>
+                    <td>None</td>
+                    <td><b>Provided</b> (Dedicated space included)</td>
+                </tr>
+                <tr>
+                    <td>Construction Disruption</td>
+                    <td><b>High</b> (Major work inside live plant)</td>
+                    <td>Low (Work is primarily external)</td>
+                </tr>
+                <tr>
+                    <td>Operational Risk</td>
+                    <td><b>High</b></td>
+                    <td>Low</td>
+                </tr>
+                <tr>
+                    <td>Layout & Serviceability</td>
+                    <td>Suboptimal (Compromises existing layout)</td>
+                    <td><b>Excellent</b> (Maintains organized plant)</td>
+                </tr>
+                <tr>
+                    <td>Initial Capital Cost</td>
+                    <td>Lower</td>
+                    <td>Higher</td>
+                </tr>
+                <tr>
+                    <td>Long-Term Value</td>
+                    <td>Low (Inflexible solution)</td>
+                    <td><b>High</b> (Future-proofs the campus)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>5.5 Recommended Path Forward</h2>
+        <p>The recommended solution is <b>Option B: CEP Expansion with Chiller Annex</b>. Based on the detailed analysis and comparative evaluation, Option B emerges as the superior solution. Although it possesses a higher initial capital cost, its strategic advantages are definitive. It is the only alternative that satisfies the project's key objective of providing a long-term, flexible solution that aligns with the campus master plan. This option resolves the immediate capacity deficit, restores critical N+1 reliability, and furnishes planned space for future growth, thereby maximizing the long-term value of the capital investment.</p>
+        <p>The immediate next step is to conduct site investigations to determine the final, optimal location for the new chiller annex and associated cooling towers.</p>
+
+    </div>
+</body>

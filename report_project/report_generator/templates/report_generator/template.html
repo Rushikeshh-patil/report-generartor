@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEP Evaluation Report</title>
+    <style>
+        /* --- Page Layout and Margins --- */
+        @page {
+            margin: 1.5cm;
+
+            @top-left {
+                content: "CEP Evaluation Report";
+                font-family: "{{ font_family }}", sans-serif;
+                font-size: 9pt;
+                color: #888;
+            }
+
+            @bottom-left {
+                content: "CEP Evaluation Report\A9 2025 SC ENGINEERS, A LEGENCE COMPANY";
+                font-family: "{{ font_family }}", sans-serif;
+                font-size: 8pt;
+                color: #888;
+                white-space: pre;
+            }
+            @bottom-right {
+                content: "SC PROJECT NO. 25120\A PAGE " counter(page);
+                font-family: "{{ font_family }}", sans-serif;
+                font-size: 8pt;
+                color: #888;
+                text-align: right;
+                white-space: pre;
+            }
+        }
+
+        /* --- General Typography --- */
+        body {
+            font-family: "{{ font_family }}", sans-serif;
+            font-size: {{ font_size }}pt;
+            line-height: 1.5;
+        }
+
+        /* --- Headings and Page Breaks --- */
+        h1, h2, h3 {
+            font-family: "{{ font_family }}", sans-serif;
+            color: {{ heading_color }}; /* Dynamic Heading Color */
+        }
+        
+        h1 {
+            font-size: 1.6em;
+        }
+
+        .new-page {
+            page-break-before: always;
+        }
+
+        /* --- Table Styling --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 4px;
+            text-align: center;
+            font-size: 9pt;
+        }
+        th {
+            background-color: {{ table_header_color }}; /* Dynamic Table Header Color */
+            color: white;
+            font-family: "{{ font_family }}", sans-serif;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* --- Other Styles --- */
+        img {
+            display: block;
+            margin: 1em auto;
+            max-width: 90%;
+        }
+        figure {
+            text-align: center;
+            font-style: italic;
+            font-size: 9pt;
+            color: #555;
+        }
+        b, strong {
+            color: {{ heading_color }}; /* Dynamic Bold Color */
+        }
+    </style>
+</head>
+<body>
+    <!-- The report_body from the context will be safely injected here by Django -->
+    {{ report_body|safe }}
+</body>
+</html>

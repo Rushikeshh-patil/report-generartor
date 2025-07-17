@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEP Evaluation Report</title>
+    <style>
+        /* --- Page Layout and Margins --- */
+        @page {
+            /* Decreased page margins */
+            margin: 1.5cm;
+
+            /* --- NEW: This adds the header to the top left of every page --- */
+            @top-left {
+                content: "CEP Evaluation Report";
+                font-family: "Calibri", sans-serif;
+                font-size: 9pt;
+                color: #888;
+            }
+
+            /* Defines the content for the footer */
+            @bottom-left {
+                content: "CEP Evaluation Report\A9 2025 SC ENGINEERS, A LEGENCE COMPANY";
+                font-family: "Calibri", sans-serif;
+                font-size: 8pt;
+                color: #888;
+                white-space: pre; /* Allows line breaks with \A */
+            }
+            @bottom-right {
+                content: "SC PROJECT NO. 25120\A PAGE " counter(page);
+                font-family: "Calibri", sans-serif;
+                font-size: 8pt;
+                color: #888;
+                text-align: right;
+                white-space: pre;
+            }
+        }
+
+        /* --- General Typography --- */
+        body {
+            font-family: "Calibri", sans-serif;
+            font-size: 11pt;
+            line-height: 1.5;
+        }
+
+        /* --- Headings and Page Breaks --- */
+        h1, h2, h3 {
+            font-family: "Calibri", sans-serif;
+            color: #193264; /* Dark Blue */
+        }
+        
+        h1 {
+            font-size: 1.6em; /* 20% smaller than the default 2em */
+        }
+
+        /* This class forces a new page */
+        .new-page {
+            page-break-before: always;
+        }
+
+        /* --- Table Styling --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2em;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 4px; /* Reduced padding for tighter cells */
+            text-align: center;
+            font-size: 9pt; /* Reduced font size for smaller text */
+        }
+        th {
+            background-color: #193264; /* Dark Blue */
+            color: white;
+            font-family: "Calibri", sans-serif;
+            font-weight: bold;
+        }
+        /* Zebra-striping for table rows */
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* --- Other Styles --- */
+        img {
+            display: block;
+            margin: 1em auto;
+            max-width: 90%;
+        }
+        figure {
+            text-align: center;
+            font-style: italic;
+            font-size: 9pt;
+            color: #555;
+        }
+        b, strong {
+            color: #193264;
+        }
+    </style>
+</head>
+<body>
+    </body>
+</html>

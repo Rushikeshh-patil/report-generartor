@@ -1,0 +1,15 @@
+Create a cover page using <div> elements, centered on the page.
+
+Format all major sections (e.g., "1.0 Executive Summary") as <h1> headings. Crucially, give each <h1> element the class new-page (e.g., <h1 class="new-page">). This will force a page break.
+
+Format subsections (e.g., "1.1 Purpose") as <h2> headings.
+
+Go through the text and bold important phrases and key findings using <b> tags.
+
+Convert all tables into proper HTML <table> structures.
+
+Insert all images using <figure> and <img> tags (e.g., <figure><img src="option_annex.png"><figcaption>Figure 1: Layout for Option B</figcaption></figure>).
+
+Also analyze the content and provide appendix. add a class name to appendix "appendix"
+
+Provide only the HTML content that should be placed inside the <body> of an HTML document.

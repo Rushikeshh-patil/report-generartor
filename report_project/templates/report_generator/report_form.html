@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Style for the color picker */
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Report Generator</h1>
+            <p class="text-gray-600 mb-8">Paste your AI-generated HTML body, customize the format, and provide the referenced files to generate a consolidated PDF report.</p>
+
+            <form id="report-form" action="." method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="action" id="form-action" value="generate">
+
+                <!-- Formatting Options Section -->
+                <details class="mb-6 bg-gray-50 border rounded-lg p-4">
+                    <summary class="text-lg font-semibold text-gray-800 cursor-pointer">Formatting Options</summary>
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Heading Color -->
+                        <div>
+                            <label for="heading_color" class="block text-sm font-medium text-gray-700 mb-1">Heading & Accent Color</label>
+                            <input type="color" id="heading_color" name="heading_color" value="#193264" class="p-1 h-12 w-12 block bg-white border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <!-- Table Header Color -->
+                        <div>
+                            <label for="table_header_color" class="block text-sm font-medium text-gray-700 mb-1">Table Header Color</label>
+                            <input type="color" id="table_header_color" name="table_header_color" value="#193264" class="p-1 h-12 w-12 block bg-white border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <!-- Font Family -->
+                        <div>
+                            <label for="font_family" class="block text-sm font-medium text-gray-700 mb-1">Font Family</label>
+                            <select id="font_family" name="font_family" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option>Calibri</option>
+                                <option>Times New Roman</option>
+                                <option>Arial</option>
+                                <option>Roboto</option>
+                                <option>Lato</option>
+                                <option>Verdana</option>
+                            </select>
+                        </div>
+                        <!-- Font Size -->
+                        <div>
+                            <label for="font_size" class="block text-sm font-medium text-gray-700 mb-1">Body Font Size (pt)</label>
+                            <input type="number" id="font_size" name="font_size" value="11" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2">
+                        </div>
+                    </div>
+                </details>
+
+                <!-- AI Prompt Section -->
+                <details class="mb-6 bg-gray-50 border rounded-lg p-4">
+                    <summary class="text-lg font-semibold text-gray-800 cursor-pointer">AI Prompt for Report Body</summary>
+                    <div class="mt-4 relative">
+                        <pre id="ai-prompt" class="bg-gray-200 p-4 rounded-md text-sm text-gray-700 whitespace-pre-wrap overflow-x-auto">Create a cover page using &lt;div&gt; elements, centered on the page.
+
+Format all major sections (e.g., "1.0 Executive Summary") as &lt;h1&gt; headings. Crucially, give each &lt;h1&gt; element the class new-page (e.g., &lt;h1 class="new-page"&gt;). This will force a page break.
+
+Format subsections (e.g., "1.1 Purpose") as &lt;h2&gt; headings.
+
+Go through the text and bold important phrases and key findings using &lt;b&gt; tags.
+
+Convert all tables into proper HTML &lt;table&gt; structures.
+
+Insert all images using &lt;figure&gt; and &lt;img&gt; tags (e.g., &lt;figure&gt;&lt;img src="option_annex.png"&gt;&lt;figcaption&gt;Figure 1: Layout for Option B&lt;/figcaption&gt;&lt;/figure&gt;).
+
+Also analyze the content and provide appendix. add a class name to appendix "appendix"
+
+Provide only the HTML content that should be placed inside the &lt;body&gt; of an HTML document.</pre>
+                        <button type="button" id="copy-prompt-btn" class="absolute top-2 right-2 bg-gray-600 text-white text-xs font-bold py-1 px-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            Copy
+                        </button>
+                    </div>
+                </details>
+
+                <!-- HTML Body Input -->
+                <div class="mb-6">
+                    <label for="html_body" class="block text-lg font-semibold text-gray-800 mb-2">HTML Body</label>
+                    <textarea id="html_body" name="html_body" rows="15" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" placeholder="Paste your HTML body content here..."></textarea>
+                </div>
+
+                <!-- Analyze Button -->
+                <div class="mb-6">
+                    <button type="button" id="analyze-btn" class="w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition duration-150 ease-in-out">
+                        Analyze Body for References
+                    </button>
+                </div>
+                
+                <!-- Dynamic File Inputs will be injected here -->
+                <div id="dynamic-inputs-container" class="space-y-6 mb-6"></div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-150 ease-in-out">
+                        Generate PDF Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div id="warning-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+      <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+          <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+            <svg class="h-6 w-6 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mt-2">Missing Files</h3>
+          <div class="mt-2 px-7 py-3">
+            <p class="text-sm text-gray-500">The following files have not been provided. The report may be incomplete.</p>
+            <ul id="missing-files-list" class="mt-4 text-left text-sm text-gray-600 list-disc list-inside"></ul>
+          </div>
+          <div class="items-center px-4 py-3">
+            <button id="proceed-btn" class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md w-auto shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">Proceed Anyway</button>
+            <button id="cancel-btn" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md w-auto ml-2 shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">Cancel</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        document.getElementById('analyze-btn').addEventListener('click', async () => {
+            const htmlBody = document.getElementById('html_body').value;
+            const container = document.getElementById('dynamic-inputs-container');
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            container.innerHTML = '<p class="text-center text-gray-500">Analyzing...</p>';
+            const formData = new FormData();
+            formData.append('html_body', htmlBody);
+            formData.append('action', 'analyze');
+            try {
+                const response = await fetch(window.location.href, { method: 'POST', body: formData, headers: { 'X-CSRFToken': csrfToken } });
+                if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
+                const data = await response.json();
+                container.innerHTML = '';
+                if (data.images.length === 0 && data.pdfs.length === 0 && data.appendices.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500">No image, PDF, or appendix references found.</p>';
+                    return;
+                }
+                
+                const createInputSection = (title, items, isAppendix = false, style) => {
+                    if (items.length > 0) {
+                        const header = document.createElement('h3');
+                        header.className = 'text-xl font-semibold text-gray-800 border-b pb-2';
+                        header.textContent = title;
+                        container.appendChild(header);
+
+                        items.forEach(item => {
+                            const inputGroup = document.createElement('div');
+                            inputGroup.className = 'p-4 bg-gray-50 rounded-lg border inputGroup';
+                            
+                            const label = document.createElement('label');
+                            label.className = 'block text-sm font-medium text-gray-700 mb-2 truncate';
+                            
+                            const input = document.createElement('input');
+                            input.type = 'file';
+
+                            if (isAppendix) {
+                                label.textContent = `Provide file for: ${item.title}`;
+                                label.title = item.title;
+                                input.name = item.slug; // Use the safe slug for the name
+                            } else {
+                                label.textContent = `Provide file for: ${item}`;
+                                label.title = item;
+                                input.name = item;
+                            }
+                            
+                            input.className = `block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold ${style.bg} ${style.text} ${style.hover}`;
+                            inputGroup.appendChild(label);
+                            inputGroup.appendChild(input);
+                            container.appendChild(inputGroup);
+                        });
+                    }
+                };
+                
+                createInputSection('Image Files', data.images, false, { bg: 'file:bg-blue-50', text: 'file:text-blue-700', hover: 'hover:file:bg-blue-100' });
+                createInputSection('PDF Files (from Body Links)', data.pdfs, false, { bg: 'file:bg-green-50', text: 'file:text-green-700', hover: 'hover:file:bg-green-100' });
+                createInputSection('Appendix PDFs', data.appendices, true, { bg: 'file:bg-purple-50', text: 'file:text-purple-700', hover: 'hover:file:bg-purple-100' });
+
+            } catch (error) {
+                console.error('Analysis failed:', error);
+                container.innerHTML = `<p class="text-center text-red-500">Error: Could not analyze the HTML. ${error.message}</p>`;
+            }
+        });
+
+        const form = document.getElementById('report-form');
+        const modal = document.getElementById('warning-modal');
+        const missingFilesList = document.getElementById('missing-files-list');
+        const proceedBtn = document.getElementById('proceed-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const fileInputs = document.querySelectorAll('#dynamic-inputs-container input[type="file"]');
+            const missingFiles = [];
+            fileInputs.forEach(input => {
+                if (input.files.length === 0) {
+                    const label = input.closest('.inputGroup').querySelector('label');
+                    if (label) {
+                        missingFiles.push(label.textContent.replace('Provide file for: ', ''));
+                    }
+                }
+            });
+            if (missingFiles.length > 0) {
+                missingFilesList.innerHTML = '';
+                missingFiles.forEach(fileName => {
+                    const li = document.createElement('li');
+                    li.textContent = fileName;
+                    missingFilesList.appendChild(li);
+                });
+                modal.classList.remove('hidden');
+            } else {
+                form.submit();
+            }
+        });
+        proceedBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            form.submit();
+        });
+        cancelBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+
+        // Copy AI Prompt to Clipboard
+        document.getElementById('copy-prompt-btn').addEventListener('click', () => {
+            const promptText = document.getElementById('ai-prompt').innerText;
+            const textArea = document.createElement('textarea');
+            textArea.value = promptText;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const copyBtn = document.getElementById('copy-prompt-btn');
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+            }
+            document.body.removeChild(textArea);
+        });
+    </script>
+</body>
+</html>
