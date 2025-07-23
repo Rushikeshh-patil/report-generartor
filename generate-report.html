@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional LCCA Report Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@9.5.1/dist/index.iife.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .input-group {
+            border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem;
+            margin-bottom: 1.5rem; background-color: white;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .input-group h3 {
+            font-size: 1.25rem; font-weight: 600; color: #1e40af;
+            border-bottom: 2px solid #dbeafe; padding-bottom: 0.75rem; margin-bottom: 1rem;
+        }
+        .label { display: block; font-weight: 500; color: #475569; margin-bottom: 0.5rem; }
+        .input, .textarea {
+            width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1;
+            border-radius: 0.375rem; transition: border-color 0.2s;
+        }
+        .textarea { min-height: 100px; }
+        .input:focus, .textarea:focus {
+            outline: none; border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
+        }
+        .btn {
+            padding: 0.75rem 1.5rem; border-radius: 0.375rem; font-weight: 600;
+            color: white; cursor: pointer; transition: background-color 0.2s;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-primary { background-color: #2563eb; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        .loading-indicator {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); z-index: 9999;
+            justify-content: center; align-items: center; flex-direction: column; color: white;
+        }
+        .notification {
+            display: none; position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%); background-color: #22c55e; color: white;
+            padding: 1rem; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 10000; transition: opacity 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div id="loadingIndicator" class="loading-indicator">
+        <svg class="animate-spin h-8 w-8 text-white mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="text-lg">Generating Word Document...</p>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-blue-800">Professional LCCA Report Generator</h1>
+            <p class="text-lg text-gray-600 mt-2">Fill the form, and export a professional .docx report.</p>
+        </header>
+
+        <div id="formContainer">
+            <!-- Project Information -->
+            <div class="input-group">
+                <h3>Project Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="label" for="projectName">Project Name</label><input class="input" type="text" id="projectName"></div>
+                    <div><label class="label" for="projectLocation">Project Location</label><input class="input" type="text" id="projectLocation"></div>
+                    <div><label class="label" for="contractNumber">Contract #</label><input class="input" type="text" id="contractNumber"></div>
+                    <div><label class="label" for="submittalPhase">Submittal Phase</label><input class="input" type="text" id="submittalPhase"></div>
+                    <div><label class="label" for="preparedFor">Prepared For (Client)</label><input class="input" type="text" id="preparedFor"></div>
+                    <div><label class="label" for="preparedBy">Prepared By (Company)</label><input class="input" type="text" id="preparedBy"></div>
+                    <div><label class="label" for="projectNumber">Project No.</label><input class="input" type="text" id="projectNumber"></div>
+                    <div><label class="label" for="footerPath">Footer File Path</label><input class="input" type="text" id="footerPath"></div>
+                    <div class="md:col-span-2"><label class="label" for="buildingInfo">Building Information</label><textarea class="textarea" id="buildingInfo"></textarea></div>
+                </div>
+            </div>
+
+            <!-- LCCA Criteria -->
+            <div class="input-group">
+                <h3>LCCA Criteria & Alternatives</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                    <div><label class="label" for="studyPeriod">Study Period (Years)</label><input class="input" type="number" id="studyPeriod" value="40"></div>
+                    <div><label class="label" for="serviceLife">Service Life (Years)</label><input class="input" type="number" id="serviceLife" value="15"></div>
+                    <div><label class="label" for="electricityRate">Electricity Rate ($/kWh)</label><input class="input" type="number" step="0.001" id="electricityRate"></div>
+                    <div><label class="label" for="gasRate">Gas Rate ($/Therm)</label><input class="input" type="number" step="0.001" id="gasRate"></div>
+                    <div><label class="label" for="numAlternatives">Number of Alternatives</label><input class="input" type="number" id="numAlternatives" value="1" min="1" max="5"></div>
+                </div>
+            </div>
+
+            <!-- Dynamic Alternatives Container -->
+            <div id="alternativesContainer"></div>
+
+            <!-- Actions -->
+            <div class="text-center my-8 flex justify-center gap-4">
+                <button id="generateBtn" class="btn btn-primary text-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 18v-6"></path><path d="m9 15 3 3 3-3"></path></svg>
+                    Export to Word
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Global Variables & Constants ---
+        const form = document.getElementById('formContainer');
+        const numAlternativesInput = document.getElementById('numAlternatives');
+        const alternativesContainer = document.getElementById('alternativesContainer');
+        const generateBtn = document.getElementById('generateBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const notification = document.getElementById('notification');
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', loadDataFromLocalStorage);
+        numAlternativesInput.addEventListener('change', () => renderAlternatives(numAlternativesInput.value));
+        form.addEventListener('input', saveDataToLocalStorage);
+        generateBtn.addEventListener('click', generateDocxReport);
+        alternativesContainer.addEventListener('click', function(e) {
+            if (e.target.classList.contains('get-desc-btn')) {
+                const group = e.target.closest('.alternative-group');
+                const systemName = group.querySelector('.alt-name').value;
+                if (!systemName) {
+                    alert('Please enter a System Name first.');
+                    return;
+                }
+                const prompt = `As an HVAC engineer, write a brief, professional description for an LCCA report for the following system: "${systemName}". Focus on the main components, their function, and any key characteristics like efficiency or application.`;
+                copyToClipboard(prompt, 'AI prompt copied to clipboard!');
+            }
+        });
+
+        // --- UI & Data Functions ---
+
+        function renderAlternatives(count, data = []) {
+            alternativesContainer.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const altData = data[i] || {};
+                const isBase = i === 0;
+                const altHtml = `
+                    <div class="input-group alternative-group">
+                        <h3 class="text-xl font-semibold text-blue-800 border-b-0 pb-0 mb-4">${isBase ? `Alternative ${i + 1} (Base Model)` : `Alternative ${i + 1}`}</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2"><label class="label">System Name</label><input class="input alt-name" type="text" value="${altData.name || ''}"></div>
+                            <div class="md:col-span-2">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="label mb-0">Description</label>
+                                    <button type="button" class="text-xs text-blue-600 hover:text-blue-800 font-semibold get-desc-btn p-1 rounded">Get AI Description</button>
+                                </div>
+                                <textarea class="textarea alt-desc">${altData.desc || ''}</textarea>
+                            </div>
+                            <div><label class="label">Initial Cost ($)</label><input class="input alt-initialCost" type="number" value="${altData.initialCost || ''}"></div>
+                            <div><label class="label">Annual M&R Cost ($)</label><input class="input alt-maintenanceCost" type="number" value="${altData.maintenanceCost || ''}"></div>
+                            <div><label class="label">Replacement Cost ($)</label><input class="input alt-replacementCost" type="number" value="${altData.replacementCost || ''}"></div>
+                            <div><label class="label">Total Life Cycle Cost ($)</label><input class="input alt-lcc" type="number" value="${altData.lcc || ''}"></div>
+                            <div><label class="label">Annual Energy (kWh)</label><input class="input alt-energyKwh" type="number" value="${altData.energyKwh || ''}"></div>
+                            <div><label class="label">Annual Energy (Therms)</label><input class="input alt-energyTherm" type="number" value="${altData.energyTherm || ''}"></div>
+                        </div>
+                    </div>`;
+                alternativesContainer.insertAdjacentHTML('beforeend', altHtml);
+            }
+        }
+
+        function getFormData() {
+            const getVal = (id) => document.getElementById(id).value;
+            const getNum = (id) => parseFloat(getVal(id)) || 0;
+            
+            const alternatives = [];
+            document.querySelectorAll('.alternative-group').forEach(group => {
+                alternatives.push({
+                    name: group.querySelector('.alt-name').value,
+                    desc: group.querySelector('.alt-desc').value,
+                    initialCost: parseFloat(group.querySelector('.alt-initialCost').value) || 0,
+                    maintenanceCost: parseFloat(group.querySelector('.alt-maintenanceCost').value) || 0,
+                    replacementCost: parseFloat(group.querySelector('.alt-replacementCost').value) || 0,
+                    energyKwh: parseFloat(group.querySelector('.alt-energyKwh').value) || 0,
+                    energyTherm: parseFloat(group.querySelector('.alt-energyTherm').value) || 0,
+                    lcc: parseFloat(group.querySelector('.alt-lcc').value) || 0,
+                });
+            });
+
+            return {
+                project: {
+                    name: getVal('projectName'), location: getVal('projectLocation'),
+                    contractNumber: getVal('contractNumber'), submittalPhase: getVal('submittalPhase'),
+                    preparedFor: getVal('preparedFor'), preparedBy: getVal('preparedBy'),
+                    projectNumber: getVal('projectNumber'), footerPath: getVal('footerPath'),
+                    buildingInfo: getVal('buildingInfo')
+                },
+                criteria: {
+                    studyPeriod: getNum('studyPeriod'), serviceLife: getNum('serviceLife'),
+                    electricityRate: getNum('electricityRate'), gasRate: getNum('gasRate')
+                },
+                alternatives: alternatives
+            };
+        }
+        
+        // --- Document Generation ---
+
+        async function generateDocxReport() {
+            if (typeof docx === 'undefined') {
+                showNotification("A required library (docx.js) is not loaded yet.", 'error');
+                return;
+            }
+
+            const { Document, Packer, Paragraph, TextRun, Table, TableCell, TableRow, WidthType, HeadingLevel, AlignmentType, PageBreak, Tab, TabStopType, BorderStyle, PageNumber, Header, Footer, ShadingType } = docx;
+
+            loadingIndicator.style.display = 'flex';
+            
+            try {
+                const data = getFormData();
+                if (data.alternatives.length === 0) throw new Error("No alternatives defined.");
+                if (data.alternatives.some(alt => alt.lcc === 0)) {
+                    if (!confirm("One or more alternatives have a Total Life Cycle Cost of $0. Do you want to proceed anyway?")) {
+                         loadingIndicator.style.display = 'none';
+                         return;
+                    }
+                }
+
+
+                const optimalSystem = data.alternatives.reduce((prev, current) => (prev.lcc < current.lcc) ? prev : current);
+                const today = new Date();
+                const datePrepared = today.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+                const fullDate = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                const format = (num) => num.toLocaleString('en-US');
+                const formatCurrency = (num) => `$ ${format(num)}`;
+
+                const emptyLine = new Paragraph("");
+                const pageBreak = new Paragraph({ children: [new PageBreak()] });
+                const createStyledTable = (data) => new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    rows: data.map((rowData, i) => new TableRow({
+                        children: rowData.map(cellData => new TableCell({
+                            children: [new Paragraph({ children: [new TextRun({ text: String(cellData), bold: i === 0, font: "Calibri" })] })],
+                            shading: i === 0 ? { type: ShadingType.CLEAR, fill: "EAEAEA" } : undefined,
+                            width: { size: 100 / rowData.length, type: WidthType.PERCENTAGE }
+                        })),
+                    })),
+                });
+
+                const doc = new Document({
+                    styles: {
+                        paragraphStyles: [
+                            { id: "normal", name: "Normal", run: { font: "Calibri", size: 22 } },
+                            { id: "Heading1", name: "Heading 1", basedOn: "normal", next: "normal", run: { size: 28, bold: true }, paragraph: { spacing: { before: 240, after: 120 } } },
+                            { id: "Heading2", name: "Heading 2", basedOn: "normal", next: "normal", run: { size: 24, bold: true }, paragraph: { spacing: { before: 180, after: 80 } } },
+                            { id: "toc", name: "TOC", basedOn: "normal", paragraph: { tabStops: [{ type: TabStopType.RIGHT, position: 9026 }] } }
+                        ]
+                    },
+                    sections: [{
+                        headers: { default: new Header({ children: [ new Paragraph(`${data.project.name}, ${data.project.location}`), new Paragraph(`CONTRACT # ${data.project.contractNumber}`) ] }) },
+                        footers: {
+                            default: new Footer({
+                                children: [ new Paragraph({
+                                    children: [ new TextRun(data.project.footerPath), new TextRun({ children: ["\t", PageNumber.CURRENT] }) ],
+                                    tabStops: [{ type: TabStopType.RIGHT, position: 9026 }]
+                                }) ],
+                            }),
+                        },
+                        children: [
+                            new Paragraph({ text: `${data.project.name}, ${data.project.location}`, alignment: AlignmentType.CENTER, style: "normal" }),
+                            new Paragraph({ text: `DESIGN ANALYSIS: Life Cycle Cost Analysis, ${data.project.submittalPhase}, ${fullDate}`, alignment: AlignmentType.CENTER, style: "normal" }),
+                            new Paragraph({ text: `CONTRACT # ${data.project.contractNumber}`, alignment: AlignmentType.CENTER, style: "normal" }),
+                            emptyLine, emptyLine, emptyLine,
+                            new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: [
+                                new TableRow({ children: [ new TableCell({ children: [new Paragraph("Prepared for:")], borders: {top:{style:BorderStyle.NONE},bottom:{style:BorderStyle.NONE},left:{style:BorderStyle.NONE},right:{style:BorderStyle.NONE}} }), new TableCell({ children: [new Paragraph(data.project.preparedFor)], borders: {top:{style:BorderStyle.NONE},bottom:{style:BorderStyle.NONE},left:{style:BorderStyle.NONE},right:{style:BorderStyle.NONE}} }) ]}),
+                                new TableRow({ children: [ new TableCell({ children: [new Paragraph("Prepared by:")], borders: {top:{style:BorderStyle.NONE},bottom:{style:BorderStyle.NONE},left:{style:BorderStyle.NONE},right:{style:BorderStyle.NONE}} }), new TableCell({ children: [new Paragraph(data.project.preparedBy)], borders: {top:{style:BorderStyle.NONE},bottom:{style:BorderStyle.NONE},left:{style:BorderStyle.NONE},right:{style:BorderStyle.NONE}} }) ]}),
+                                new TableRow({ children: [ new TableCell({ children: [new Paragraph("Date Prepared:")], borders: {top:{style:BorderStyle.NONE},bottom:{style:BorderStyle.NONE},left:{style:BorderStyle.NONE},right:{style:BorderStyle.NONE}} }), new TableCell({ children: [new Paragraph(datePrepared)], borders: {top:{style:BorderStyle.NONE},bottom:{style:BorderStyle.NONE},left:{style:BorderStyle.NONE},right:{style:BorderStyle.NONE}} }) ]}),
+                                new TableRow({ children: [ new TableCell({ children: [new Paragraph("SC Project No.:")], borders: {top:{style:BorderStyle.NONE},bottom:{style:BorderStyle.NONE},left:{style:BorderStyle.NONE},right:{style:BorderStyle.NONE}} }), new TableCell({ children: [new Paragraph(data.project.projectNumber)], borders: {top:{style:BorderStyle.NONE},bottom:{style:BorderStyle.NONE},left:{style:BorderStyle.NONE},right:{style:BorderStyle.NONE}} }) ]}),
+                            ]}),
+                            pageBreak,
+                            new Paragraph({ text: "TABLE OF CONTENTS", heading: HeadingLevel.HEADING_1 }),
+                            new Paragraph({ style: "toc", children: [new TextRun("1.0\tExecutive Summary"), new TextRun({ children: ["\t", "3"] })] }),
+                            new Paragraph({ style: "toc", children: [new TextRun("2.0\tIntroduction"), new TextRun({ children: ["\t", "4"] })] }),
+                            new Paragraph({ style: "toc", children: [new TextRun("3.0\tHVAC System Alternatives"), new TextRun({ children: ["\t", "5"] })] }),
+                            new Paragraph({ style: "toc", children: [new TextRun("4.0\tLCCA Criteria"), new TextRun({ children: ["\t", "6"] })] }),
+                            new Paragraph({ style: "toc", children: [new TextRun("5.0\tLCCA Results"), new TextRun({ children: ["\t", "7"] })] }),
+                            new Paragraph({ style: "toc", children: [new TextRun("APPENDICES")] }),
+                            pageBreak,
+                            new Paragraph({ text: "1.0 Executive Summary", heading: HeadingLevel.HEADING_1 }),
+                            new Paragraph({ text: `The calculations and analysis performed indicate that the ${optimalSystem.name} system has the lowest life cycle cost over a ${data.criteria.studyPeriod}-year analysis period. This Life Cycle Cost Analysis provides the following Total Life Cycle Costs for the base system and the two alternate HVAC Systems:`, style: "normal" }),
+                            emptyLine,
+                            createStyledTable([["HVAC SYSTEM", `TOTAL LIFE CYCLE COST (${data.criteria.studyPeriod}-YEAR)`], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.lcc)])]),
+                            pageBreak,
+                            new Paragraph({ text: "2.0 Introduction", heading: HeadingLevel.HEADING_1 }),
+                            new Paragraph({ text: "2.1 Problem Statement", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: `This life cycle cost analysis (LCCA) was completed to evaluate three heating, ventilating, and air conditioning (HVAC) systems alternatives to determine which system provided the most economical solution while evaluating initial costs, utility costs, maintenance & repair costs, and appropriate replacement costs.`, style: "normal" }),
+                            new Paragraph({ text: "2.2 Approach", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: `The LCCA was prepared in accordance with appropriate UFCs. The objective is to determine the lowest cost HVAC system within the given parameters. The LCCA was performed for a period of ${data.criteria.studyPeriod} years per UFC 1-200-02. Per ASHRAE comparison of service life estimates period of equipment/technology life is to be set at ${data.criteria.serviceLife} years. Since all alternates have the same estimated life, the residual or salvage values are set at 0.`, style: "normal" }),
+                            new Paragraph({ text: "2.3 Building Information", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: data.project.buildingInfo, style: "normal" }),
+                            new Paragraph({ text: "2.4 Applicable Codes and Standards", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: "The project scope of work, including referenced UFCs, must be adhered to in the design, and these calculations.", style: "normal" }),
+                            new Paragraph({ text: "2.5 Calculation Software", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: "The LCCA was preformed using the National Institute of Standards and Technology (NIST) Building Life Cycle Costing (BLCC) program in accordance with the FC 1-300-09N, UFC 1-200-02, and UFC 3-410-01. The energy performance of each proposed HVAC system was calculated using EnergyPro Building Energy Analysis Software developed by EnergySoft.", style: "normal" }),
+                            pageBreak,
+                            new Paragraph({ text: "3.0 HVAC System Alternatives", heading: HeadingLevel.HEADING_1 }),
+                            ...data.alternatives.flatMap((alt, i) => [ new Paragraph({ text: `3.${i+1} ${i === 0 ? 'Base Model' : `Alternate #${i}`}: ${alt.name}`, heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: alt.desc, style: "normal" }), emptyLine ]),
+                            pageBreak,
+                            new Paragraph({ text: "4.0 LCCA Criteria", heading: HeadingLevel.HEADING_1 }),
+                            new Paragraph({ text: "4.1 Schedule / Life", heading: HeadingLevel.HEADING_2 }),
+                            createStyledTable([["ITEM", "DATE / TIME PERIOD"], ["Base Date", fullDate], ["Study Period", `${data.criteria.studyPeriod} Years`], ["Service Life", `${data.criteria.serviceLife} Years`]]),
+                            new Paragraph({ text: "4.2 Initial Costs", heading: HeadingLevel.HEADING_2 }),
+                            createStyledTable([["HVAC SYSTEM", "INITIAL CONSTRUCTION COST"], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.initialCost)])]),
+                            new Paragraph({ text: "4.3 Utility Costs", heading: HeadingLevel.HEADING_2 }),
+                            createStyledTable([["UTILITY", "RATES"], ["Electricity", `$${data.criteria.electricityRate} / kWh`], ["Gas", `$${data.criteria.gasRate} / Therm`]]),
+                            new Paragraph({ text: "4.4 Maintenance and Repair Costs", heading: HeadingLevel.HEADING_2 }),
+                            createStyledTable([["HVAC SYSTEM", "ANNUAL COST"], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.maintenanceCost)])]),
+                            new Paragraph({ text: "4.5 Replacement Costs", heading: HeadingLevel.HEADING_2 }),
+                            createStyledTable([["HVAC SYSTEM", `REPLACEMENT COSTS (${data.criteria.serviceLife} Years)`], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.replacementCost)])]),
+                            new Paragraph({ text: "4.6 Energy Usage", heading: HeadingLevel.HEADING_2 }),
+                            createStyledTable([["HVAC SYSTEM", "Energy Use (KWH)", "Energy Use (Therms)"], ...data.alternatives.map(alt => [alt.name, format(alt.energyKwh), format(alt.energyTherm)])]),
+                            pageBreak,
+                            new Paragraph({ text: "5.0 LCCA Results", heading: HeadingLevel.HEADING_1 }),
+                            new Paragraph({ text: "5.1 LCCA", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: "The use of the NIST BLCC software in development of this LCCA with the aforementioned study period, initial costs, utility costs, maintenance & repair costs, and energy costs, established the results in the summary provided in Appendices C and D.", style: "normal" }),
+                            new Paragraph({ text: "5.2 Optimal HVAC System Alternate", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: `Of the HVAC system alternates analyzed for the DAC, the ${optimalSystem.name} system is the optimal choice over the ${data.criteria.studyPeriod}-year life.`, style: "normal" }),
+                            emptyLine,
+                            createStyledTable([["HVAC SYSTEM", `TOTAL LIFE CYCLE COST (${data.criteria.studyPeriod}-YEAR)`], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.lcc)])]),
+                            pageBreak,
+                            new Paragraph({ text: "APPENDICES", heading: HeadingLevel.HEADING_1 }),
+                            ...data.alternatives.flatMap((alt, i) => [ new Paragraph({ text: `Appendix A${i+1} | Energy Usage – ${i === 0 ? 'Base' : `Alternate #${i}`}`, heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: `[Placeholder: Insert EnergyPro summary image for ${alt.name} here]`, style: "normal" }), emptyLine ]),
+                            new Paragraph({ text: "Appendix B | Comparison of service life estimates", heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: "[Placeholder: Insert service life comparison data here]", style: "normal" }), emptyLine,
+                            new Paragraph({ text: "Appendix C | NIST Lowest LCC Report", heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: "[Placeholder: Insert NIST Lowest LCC Report image here]", style: "normal" }), emptyLine,
+                            new Paragraph({ text: "Appendix D | NIST BLCC Summary", heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: "[Placeholder: Insert NIST BLCC Summary image here]", style: "normal" }), emptyLine,
+                        ],
+                    }],
+                });
+
+                const blob = await Packer.toBlob(doc);
+                saveAs(blob, "LCCA_Report.docx");
+
+            } catch (error) {
+                console.error("Error generating DOCX file:", error);
+                alert("An error occurred while generating the report: " + error.message);
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        // --- Utility Functions ---
+        function copyToClipboard(text, message) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification(message, 'success');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                showNotification('Failed to copy prompt.', 'error');
+            });
+        }
+
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.style.backgroundColor = type === 'success' ? '#22c55e' : '#ef4444';
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        // --- Local Storage Persistence ---
+        function saveDataToLocalStorage() {
+            const data = getFormData();
+            data.numAlternatives = numAlternativesInput.value;
+            localStorage.setItem('lccaReportData', JSON.stringify(data));
+        }
+
+        function loadDataFromLocalStorage() {
+            const savedData = localStorage.getItem('lccaReportData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                Object.keys(data.project).forEach(key => { if(document.getElementById(key)) document.getElementById(key).value = data.project[key]; });
+                Object.keys(data.criteria).forEach(key => { if(document.getElementById(key)) document.getElementById(key).value = data.criteria[key]; });
+                if(document.getElementById('numAlternatives')) document.getElementById('numAlternatives').value = data.numAlternatives || 1;
+                
+                renderAlternatives(data.numAlternatives || 1, data.alternatives);
+            } else {
+                renderAlternatives(1);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -23,4 +23,5 @@ urlpatterns = [
     # This line includes all the URLs from the 'report_generator' app.
     # Any request to the root URL will be forwarded to the app's urls.py.
     path('', include('report_generator.urls')),
+    path('todo/', include('todo.urls')),
 ]
