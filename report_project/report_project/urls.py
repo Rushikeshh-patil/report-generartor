@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # This line includes all the URLs from the 'report_generator' app.
     # Any request to the root URL will be forwarded to the app's urls.py.
-    path('', include('report_generator.urls')),
-    path('todo/', include('todo.urls')),
+    path('', include('todo.urls')), # Make our to-do app the homepage
+    path('report/', include('report_generator.urls')),
+    path('accounts/', include('django.contrib.auth.urls'))
 ]
