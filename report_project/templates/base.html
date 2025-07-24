@@ -14,7 +14,7 @@
                     {% if user.is_staff %}
                         <a href="{% url 'performance_dashboard' %}" class="px-3 py-2 text-red-500 font-bold hover:text-red-700">Dashboard</a>
                     {% endif %}
-                    <a href="{% url 'task_create' %}" class="px-3 py-2 text-gray-700 hover:text-blue-600">New Task</a>
+                    
                     
                     <form action="{% url 'logout' %}" method="post" class="inline">
                         {% csrf_token %}

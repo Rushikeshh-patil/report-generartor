@@ -20,16 +20,21 @@ class ProjectForm(forms.ModelForm):
 class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
-        # Add 'due_date' to the fields
         fields = ['title', 'description', 'project', 'assignee', 'estimated_hours', 'due_date']
-        # Add a widget for a calendar-style date picker
         widgets = {
             'due_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
     def __init__(self, user, *args, **kwargs):
         super(TaskForm, self).__init__(*args, **kwargs)
+        # Filter the project queryset like before
         self.fields['project'].queryset = Project.objects.filter(members=user)
+        
+        # If the form is for creating (not editing) and has an initial project set
+        if 'initial' in kwargs and 'project' in kwargs['initial']:
+            # Make the project field disabled so it can't be changed
+            self.fields['project'].disabled = True
+
         # Style all form fields
         for field_name, field in self.fields.items():
             field.widget.attrs.update({'class': 'w-full p-2 border rounded'})

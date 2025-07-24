@@ -143,12 +143,28 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
     form_class = TaskForm
     template_name = 'todo/task_form.html'
-    success_url = reverse_lazy('task_list')
-
+    
     def get_form_kwargs(self):
+        # Pass the current user to the form
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+
+    def get_initial(self):
+        # Pre-select the project in the form
+        project = get_object_or_404(Project, pk=self.kwargs['project_pk'])
+        return {'project': project}
+
+    def form_valid(self, form):
+        # Get the project from the URL and assign it to the task
+        project = get_object_or_404(Project, pk=self.kwargs['project_pk'])
+        form.instance.project = project
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # After creating, return to the project detail page
+        return reverse_lazy('project_detail', kwargs={'pk': self.kwargs['project_pk']})
+
     
 def update_task_status(request, pk):
     task = get_object_or_404(Task, pk=pk)
