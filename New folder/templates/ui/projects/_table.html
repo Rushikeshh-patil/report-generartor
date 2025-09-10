@@ -6,6 +6,7 @@
       <th>Active</th>
       <th>Managers</th>
       <th>Principals</th>
+      <th>Actions</th>
     </tr>
   </thead>
   <tbody>
@@ -16,9 +17,10 @@
         <td>{{ project.active|yesno:"Yes,No" }}</td>
         <td>{% for u in project.managers.all %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
         <td>{% for u in project.principals.all %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+        <td><a class="btn btn-sm btn-ghost" href="{% url 'ui:project-edit' project.id %}">Edit</a></td>
       </tr>
     {% empty %}
-      <tr><td colspan="5">No projects found.</td></tr>
+      <tr><td colspan="6">No projects found.</td></tr>
     {% endfor %}
   </tbody>
 </table>
@@ -31,4 +33,3 @@
     <a hx-get="?page={{ page_obj.next_page_number }}" hx-push-url="true">Next</a>
   {% endif %}
 </div>
-

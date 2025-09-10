@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Projects</h1>
-<div style="margin-bottom:8px;">
-  <a href="{% url 'ui:project-create' %}">+ New Project</a>
-  <a href="/api/projects/?{{ request.GET.urlencode }}" style="margin-left:12px;">API</a>
+<div style="margin-bottom:8px; display:flex; gap:8px; align-items:center;">
+  <a class="btn btn-primary" href="{% url 'ui:project-create' %}">+ New Project</a>
+  <a class="btn btn-ghost" href="/api/projects/?{{ request.GET.urlencode }}">API</a>
   </div>
 <div class="filters">
   <form hx-get="" hx-target="#projects-table" hx-trigger="change, keyup delay:300ms, submit" hx-push-url="true">

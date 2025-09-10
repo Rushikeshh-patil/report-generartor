@@ -5,3 +5,4 @@ django-cors-headers==4.8.0
 python-dotenv==1.1.1
 # Optional for Postgres deployments
 psycopg2-binary>=2.9
+holidays>=0.56

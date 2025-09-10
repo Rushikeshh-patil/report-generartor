@@ -1,20 +1,21 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Edit RFI {{ obj.rfi_number|default:obj.rfi_id }}</h1>
-<div class="card" style="max-width:900px;">
-  <form method="post">
+<div class="form-card" style="max-width:900px;">
+  <form method="post" class="form-grid form-2">
     {% csrf_token %}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <label>Project {{ form.project }}</label>
-      <label>RFI No {{ form.rfi_number }}</label>
-      <label>Assigned To {{ form.assigned_to }}</label>
-      <label>Originator {{ form.originator }}</label>
-      <label>Date Received {{ form.date_received }}</label>
-      <label>Name {{ form.name }}</label>
+    <div class="form-grid form-2">
+      <label class="form-field"><span class="caption">Project</span>{{ form.project }}</label>
+      <label class="form-field"><span class="caption">RFI No</span>{{ form.rfi_number }}</label>
+      <label class="form-field"><span class="caption">Assigned To</span>{{ form.assigned_to }}</label>
+      <label class="form-field"><span class="caption">Originator</span>{{ form.originator }}</label>
+      <label class="form-field"><span class="caption">Date Received</span>{{ form.date_received }}</label>
+      <label class="form-field"><span class="caption">Name</span>{{ form.name }}</label>
     </div>
-    <div style="margin-top:8px; display:flex; gap:12px;">
-      <button type="submit">Save</button>
-      <a href="{% url 'ui:rfi-detail' obj.id %}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save</button>
+      <button class="btn btn-ghost" type="submit" name="recalc_due" value="1">Recalculate Due Date</button>
+      <a class="btn btn-ghost" href="{% url 'ui:rfi-detail' obj.id %}">Cancel</a>
     </div>
   </form>
   {% if form.errors %}
@@ -22,4 +23,3 @@
   {% endif %}
 </div>
 {% endblock %}
-

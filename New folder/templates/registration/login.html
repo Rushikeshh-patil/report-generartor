@@ -1,14 +1,23 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="card" style="max-width:420px;margin:40px auto;">
-  <h2>Sign in</h2>
-  <form method="post">
+<div class="form-card" style="max-width:420px;margin:40px auto;">
+  <h2 style="margin:0 0 12px 0;">Sign in</h2>
+  <form method="post" class="form-grid">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
+    <label class="form-field">
+      <span class="caption">Username</span>
+      {{ form.username }}
+    </label>
+    <label class="form-field">
+      <span class="caption">Password</span>
+      {{ form.password }}
+    </label>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Login</button>
+    </div>
   </form>
   {% if form.errors %}
     <p class="overdue">Please check your username/password.</p>
   {% endif %}
+</div>
 {% endblock %}
-

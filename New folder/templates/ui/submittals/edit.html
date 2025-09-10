@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Edit Submittal {{ obj.submittal_id }}</h1>
-<div class="card" style="max-width:900px;">
-  <form method="post">
+<div class="form-card" style="max-width:900px;">
+  <form method="post" class="form-grid form-2">
     {% csrf_token %}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-      <label>Project {{ form.project }}</label>
-      <label>Assigned PM {{ form.assigned_pm }}</label>
-      <label>Name {{ form.name }}</label>
-      <label>Spec Section {{ form.spec_section }}</label>
-      <label>Originator {{ form.originator }}</label>
-      <label>Description {{ form.description }}</label>
-      <label>Date Received {{ form.date_received }}</label>
-      <label>Date Logged {{ form.date_logged }}</label>
-      <label>Notes {{ form.notes }}</label>
+    <div class="form-grid form-2">
+      <label class="form-field"><span class="caption">Project</span>{{ form.project }}</label>
+      <label class="form-field"><span class="caption">Assigned PM</span>{{ form.assigned_pm }}</label>
+      <label class="form-field"><span class="caption">Name</span>{{ form.name }}</label>
+      <label class="form-field"><span class="caption">Spec Section</span>{{ form.spec_section }}</label>
+      <label class="form-field"><span class="caption">Originator</span>{{ form.originator }}</label>
+      <label class="form-field" style="grid-column: span 2"><span class="caption">Description</span>{{ form.description }}</label>
+      <label class="form-field"><span class="caption">Date Received</span>{{ form.date_received }}</label>
+      <label class="form-field"><span class="caption">Date Logged</span>{{ form.date_logged }}</label>
+      <label class="form-field" style="grid-column: span 2"><span class="caption">Notes</span>{{ form.notes }}</label>
     </div>
-    <div style="margin-top:8px; display:flex; gap:12px;">
-      <button type="submit">Save</button>
-      <a href="{% url 'ui:submittal-detail' obj.id %}">Cancel</a>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save</button>
+      <button class="btn btn-ghost" type="submit" name="recalc_due" value="1">Recalculate Due Date</button>
+      <a class="btn btn-ghost" href="{% url 'ui:submittal-detail' obj.id %}">Cancel</a>
     </div>
   </form>
   {% if form.errors %}

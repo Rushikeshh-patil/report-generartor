@@ -37,9 +37,9 @@
       {% include 'ui/submittals/_status_block.html' %}
     </div>
     <div style="margin-top:8px; display:flex; gap:12px; align-items:center;">
-      <a href="/submittals/">Back to list</a>
+      <a class="btn btn-ghost" href="/submittals/">Back to list</a>
       {% if can_edit_submittal %}
-        <a href="{% url 'ui:submittal-edit' obj.id %}">Edit</a>
+        <a class="btn btn-primary" href="{% url 'ui:submittal-edit' obj.id %}">Edit</a>
       {% endif %}
     </div>
   </div>

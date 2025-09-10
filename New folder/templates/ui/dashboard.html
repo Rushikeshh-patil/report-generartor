@@ -1,37 +1,76 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Dashboard</h1>
-<div class="grid grid-3">
-  <div class="card">
-    <div>My Submittals</div>
-    <div style="font-size:28px; font-weight:700;">{{ my_assigned_counts.submittals }}</div>
+<div class="grid" style="gap:16px">
+  <div class="stats grid grid-4">
+    <div class="stat card">
+      <div class="label">My Submittals</div>
+      <div class="kpi">{{ my_assigned_counts.submittals }}</div>
+    </div>
+    <div class="stat card">
+      <div class="label">My RFIs</div>
+      <div class="kpi">{{ my_assigned_counts.rfis }}</div>
+    </div>
+    <div class="stat warn card">
+      <div class="label">Overdue Submittals</div>
+      <div class="kpi">{{ overdue_submittals }}</div>
+    </div>
+    <div class="stat bad card">
+      <div class="label">Overdue RFIs</div>
+      <div class="kpi">{{ overdue_rfis }}</div>
+    </div>
   </div>
-  <div class="card">
-    <div>My RFIs</div>
-    <div style="font-size:28px; font-weight:700;">{{ my_assigned_counts.rfis }}</div>
+
+  <div class="card chart-card">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px 0 16px">
+      <h3>Open Submittals by Project</h3>
+      <a class="btn btn-ghost" href="/submittals/">View All</a>
+    </div>
+    <div style="padding:8px 16px 16px 16px">
+      <canvas id="byProjectChart" height="110"></canvas>
+      {{ by_project|json_script:"byProjectData" }}
+    </div>
   </div>
-  <div class="card">
-    <div>Overdue</div>
-    <div><span class="overdue">Submittals: {{ overdue_submittals }}</span></div>
-    <div><span class="overdue">RFIs: {{ overdue_rfis }}</span></div>
+
+  <div class="grid grid-3">
+    <div class="card chart-card" style="grid-column: span 2;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px 0 16px">
+        <h3>Due Next 7 Days</h3>
+        <a class="btn btn-ghost" href="/submittals/?due_from={{ today }}&due_to={{ today|add:'7' }}">Drilldown</a>
+      </div>
+      <div style="padding:8px 16px 16px 16px">
+        <canvas id="due7Chart" height="110"></canvas>
+        {{ due_next_7|json_script:"due7Data" }}
+      </div>
+    </div>
+    <div class="card">
+      <h3>My Overdue Items</h3>
+      <table>
+        <thead><tr><th>Type</th><th>Project</th><th>Due</th><th></th></tr></thead>
+        <tbody>
+          {% with user=request.user %}
+          {% for s in submittals_overdue %}
+            <tr>
+              <td><span class="badge">Submittal</span></td>
+              <td>{{ s.project__number }}</td>
+              <td class="overdue">{{ s.due_date }}</td>
+              <td><a class="btn btn-ghost" href="/submittals/{{ s.id }}/">Open</a></td>
+            </tr>
+          {% endfor %}
+          {% for r in rfis_overdue %}
+            <tr>
+              <td><span class="badge">RFI</span></td>
+              <td>{{ r.project__number }}</td>
+              <td class="overdue">{{ r.due_date }}</td>
+              <td><a class="btn btn-ghost" href="/rfis/{{ r.id }}/">Open</a></td>
+            </tr>
+          {% endfor %}
+          {% if not submittals_overdue and not rfis_overdue %}
+            <tr><td colspan="4">Nothing overdue 🎉</td></tr>
+          {% endif %}
+          {% endwith %}
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
-
-<h2 style="margin-top:20px;">By Project (Top Open Submittals)</h2>
-<table>
-  <thead>
-    <tr><th>Project</th><th>Open Submittals</th></tr>
-  </thead>
-  <tbody>
-    {% for p in by_project %}
-      <tr>
-        <td>{{ p.project__number }} — {{ p.project__name }}</td>
-        <td>{{ p.open_count }}</td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="2">No data</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
 {% endblock %}
-

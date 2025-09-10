@@ -1,13 +1,22 @@
 <tr id="row-{{ r.id }}">
-  <td><a href="{% url 'ui:rfi-detail' r.id %}">{{ r.rfi_number|default:'—' }}</a></td>
   <td>
-    <form>
-      {% csrf_token %}
-      <input type="text" name="name" value="{{ r.name }}"
-             hx-post="{% url 'ui:rfi-inline-name' r.id %}"
-             hx-target="#row-{{ r.id }}" hx-swap="outerHTML"
-             placeholder="(no name)" style="width: 16em;" />
-    </form>
+    <div class="inline-edit">
+      <button type="button" class="display"><span class="label">{{ r.rfi_number|default:'—' }}</span></button>
+      <form class="editor" hx-post="{% url 'ui:rfi-inline-number' r.id %}" hx-target="#row-{{ r.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="text" name="rfi_number" value="{{ r.rfi_number }}" placeholder="—" style="width: 8em;" />
+      </form>
+      <a href="{% url 'ui:rfi-detail' r.id %}" title="Open">↗</a>
+    </div>
+  </td>
+  <td>
+    <div class="inline-edit">
+      <button type="button" class="display"><span class="label">{{ r.name|default:'(no name)' }}</span></button>
+      <form class="editor" hx-post="{% url 'ui:rfi-inline-name' r.id %}" hx-target="#row-{{ r.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="text" name="name" value="{{ r.name }}" placeholder="(no name)" style="width: 16em;" />
+      </form>
+    </div>
   </td>
   <td>{{ r.project.number }} — {{ r.project.name }}</td>
   <td>{% if r.is_overdue %}<span class="overdue">{{ r.due_date }}</span>{% else %}{{ r.due_date }}{% endif %}</td>

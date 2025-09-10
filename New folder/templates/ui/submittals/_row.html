@@ -1,6 +1,24 @@
 <tr id="row-{{ s.id }}">
-  <td><a href="{% url 'ui:submittal-detail' s.id %}">{{ s.name|default:s.submittal_id }}</a></td>
+  <td>
+    <div class="inline-edit">
+      <button type="button" class="display"><span class="label">{{ s.name|default:'(no name)' }}</span></button>
+      <form class="editor" hx-post="{% url 'ui:submittal-inline-name' s.id %}" hx-target="#row-{{ s.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="text" name="name" value="{{ s.name }}" placeholder="(no name)" style="width: 14em;" />
+      </form>
+      <a href="{% url 'ui:submittal-detail' s.id %}" title="Open">↗</a>
+    </div>
+  </td>
   <td>{{ s.project.number }} — {{ s.project.name }}</td>
+  <td>
+    <div class="inline-edit">
+      <button type="button" class="display"><span class="label">{{ s.spec_section }}</span></button>
+      <form class="editor" hx-post="{% url 'ui:submittal-inline-spec' s.id %}" hx-target="#row-{{ s.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="text" name="spec_section" value="{{ s.spec_section }}" placeholder="00 00 00" style="width: 8em;" />
+      </form>
+    </div>
+  </td>
   <td>{% if s.is_overdue %}<span class="overdue">{{ s.due_date }}</span>{% else %}{{ s.due_date }}{% endif %}</td>
   <td>
     <form hx-post="{% url 'ui:submittal-inline-status' s.id %}"
@@ -43,5 +61,13 @@
       {{ s.assigned_pm.get_full_name|default:s.assigned_pm.username }}
     {% endif %}
   </td>
-  <td>{{ s.originator }}</td>
+  <td>
+    <div class="inline-edit">
+      <button type="button" class="display"><span class="label">{{ s.originator }}</span></button>
+      <form class="editor" hx-post="{% url 'ui:submittal-inline-originator' s.id %}" hx-target="#row-{{ s.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="text" name="originator" value="{{ s.originator }}" placeholder="Originator" style="width: 12em;" />
+      </form>
+    </div>
+  </td>
 </tr>

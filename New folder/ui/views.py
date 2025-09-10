@@ -42,8 +42,30 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         }
         ctx["overdue_submittals"] = subs_qs.filter(due_date__lt=today).exclude(status__in=[SubmittalStatus.RETURNED, SubmittalStatus.VOID]).count()
         ctx["overdue_rfis"] = rfis_qs.filter(due_date__lt=today).exclude(status__in=[RFIStatus.RETURNED, RFIStatus.VOID]).count()
-        ctx["by_project"] = (
+        ctx["by_project"] = list(
             subs_qs.values("project__number", "project__name").annotate(open_count=Count("id")).order_by("-open_count")[:10]
+        )
+        # Due next 7 days (inclusive)
+        from datetime import timedelta
+        upcoming = []
+        subs_map = {r["due_date"].isoformat(): r["c"] for r in subs_qs.filter(due_date__gte=today, due_date__lte=today+timedelta(days=7)).values("due_date").annotate(c=Count("id"))}
+        rfis_map = {r["due_date"].isoformat(): r["c"] for r in rfis_qs.filter(due_date__gte=today, due_date__lte=today+timedelta(days=7)).values("due_date").annotate(c=Count("id"))}
+        for i in range(0,8):
+            d = (today + timedelta(days=i)).isoformat()
+            upcoming.append({"date": d, "submittals": subs_map.get(d, 0), "rfis": rfis_map.get(d, 0)})
+        ctx["due_next_7"] = upcoming
+        # My overdue lists
+        ctx["submittals_overdue"] = list(
+            Submittal.objects.filter(assigned_pm=user, due_date__lt=today)
+            .exclude(status__in=[SubmittalStatus.RETURNED, SubmittalStatus.VOID])
+            .values("id", "project__number", "due_date")
+            .order_by("due_date")[:10]
+        )
+        ctx["rfis_overdue"] = list(
+            RFI.objects.filter(assigned_to=user, due_date__lt=today)
+            .exclude(status__in=[RFIStatus.RETURNED, RFIStatus.VOID])
+            .values("id", "project__number", "due_date")
+            .order_by("due_date")[:10]
         )
         return ctx
 
@@ -93,6 +115,40 @@ class ProjectCreateView(LoginRequiredMixin, View):
             return HttpResponse("Forbidden", status=403)
         form = ProjectForm()
         return render(request, self.template_name, {"form": form})
+
+
+class ProjectUpdateView(LoginRequiredMixin, View):
+    template_name = "ui/projects/edit.html"
+
+    def get_object(self, pk):
+        return get_object_or_404(Project, pk=pk)
+
+    def dispatch(self, request, *args, **kwargs):
+        user = request.user
+        if not (user.is_superuser or user.groups.filter(name="admin").exists()):
+            return HttpResponse("Forbidden", status=403)
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request: HttpRequest, pk: str) -> HttpResponse:
+        project = self.get_object(pk)
+        form = ProjectForm(instance=project)
+        return render(request, self.template_name, {"form": form, "obj": project})
+
+    def post(self, request: HttpRequest, pk: str) -> HttpResponse:
+        project = self.get_object(pk)
+        if "archive" in request.POST:
+            project.active = False
+            project.save(update_fields=["active"])
+            return redirect("ui:projects")
+        if "unarchive" in request.POST:
+            project.active = True
+            project.save(update_fields=["active"])
+            return redirect("ui:projects")
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            return redirect("ui:projects")
+        return render(request, self.template_name, {"form": form, "obj": project})
 
     def post(self, request: HttpRequest) -> HttpResponse:
         user = request.user
@@ -491,7 +547,13 @@ class RfiUpdateView(LoginRequiredMixin, View):
             return HttpResponse("Forbidden", status=403)
         form = RfiForm(request.POST, instance=obj)
         if form.is_valid():
-            form.save()
+            if "recalc_due" in request.POST and form.cleaned_data.get("date_received"):
+                from catrack.business_days import add_business_days
+                obj = form.save(commit=False)
+                obj.due_date = add_business_days(obj.date_received, 5)
+                obj.save()
+            else:
+                form.save()
             return redirect("ui:rfi-detail", pk=obj.id)
         return render(request, self.template_name, {"form": form, "obj": obj})
 
@@ -560,6 +622,66 @@ class SubmittalInlineStatusView(LoginRequiredMixin, View):
         return _render_submittal_row(request, sub)
 
 
+class SubmittalInlineNameView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pk: str) -> HttpResponse:
+        sub = get_object_or_404(Submittal, pk=pk)
+        user = request.user
+        if not (user.is_superuser or user.groups.filter(name__in=["admin", "pm"]).exists() or sub.assigned_pm_id == user.id):
+            return HttpResponse("Forbidden", status=403)
+        new_val = (request.POST.get("name") or "").strip()
+        old_val = sub.name
+        sub.name = new_val
+        sub.save(update_fields=["name"])
+        ActivityLog.objects.create(
+            actor=user,
+            action="FIELD_EDIT",
+            target_content_type=ContentType.objects.get_for_model(Submittal),
+            target_object_id=str(sub.id),
+            notes=f"name: {old_val} -> {new_val}",
+        )
+        return _render_submittal_row(request, sub)
+
+
+class SubmittalInlineOriginatorView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pk: str) -> HttpResponse:
+        sub = get_object_or_404(Submittal, pk=pk)
+        user = request.user
+        if not (user.is_superuser or user.groups.filter(name__in=["admin", "pm"]).exists() or sub.assigned_pm_id == user.id):
+            return HttpResponse("Forbidden", status=403)
+        new_val = (request.POST.get("originator") or "").strip()
+        old_val = sub.originator
+        sub.originator = new_val
+        sub.save(update_fields=["originator"])
+        ActivityLog.objects.create(
+            actor=user,
+            action="FIELD_EDIT",
+            target_content_type=ContentType.objects.get_for_model(Submittal),
+            target_object_id=str(sub.id),
+            notes=f"originator: {old_val} -> {new_val}",
+        )
+        return _render_submittal_row(request, sub)
+
+
+class SubmittalInlineSpecView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pk: str) -> HttpResponse:
+        sub = get_object_or_404(Submittal, pk=pk)
+        user = request.user
+        if not (user.is_superuser or user.groups.filter(name__in=["admin", "pm"]).exists() or sub.assigned_pm_id == user.id):
+            return HttpResponse("Forbidden", status=403)
+        new_val = (request.POST.get("spec_section") or "").strip()
+        old_val = sub.spec_section
+        sub.spec_section = new_val
+        sub.save(update_fields=["spec_section"])
+        ActivityLog.objects.create(
+            actor=user,
+            action="FIELD_EDIT",
+            target_content_type=ContentType.objects.get_for_model(Submittal),
+            target_object_id=str(sub.id),
+            notes=f"spec_section: {old_val} -> {new_val}",
+        )
+        return _render_submittal_row(request, sub)
+
+
 class SubmittalInlineAssignView(LoginRequiredMixin, View):
     def post(self, request: HttpRequest, pk: str) -> HttpResponse:
         sub = get_object_or_404(Submittal, pk=pk)
@@ -574,8 +696,17 @@ class SubmittalInlineAssignView(LoginRequiredMixin, View):
             new_user = User.objects.get(pk=assigned_pm)
         except User.DoesNotExist:
             return HttpResponse("Bad Request", status=400)
+        old = sub.assigned_pm
         sub.assigned_pm = new_user
         sub.save(update_fields=["assigned_pm"])
+        # Activity log
+        ActivityLog.objects.create(
+            actor=user,
+            action="ASSIGNMENT_CHANGE",
+            target_content_type=ContentType.objects.get_for_model(Submittal),
+            target_object_id=str(sub.id),
+            notes=f"assigned_pm: {getattr(old,'username',old)} -> {new_user.username}",
+        )
         return _render_submittal_row(request, sub)
 
 
@@ -639,8 +770,16 @@ class RfiInlineAssignView(LoginRequiredMixin, View):
             new_user = User.objects.get(pk=assigned_to)
         except User.DoesNotExist:
             return HttpResponse("Bad Request", status=400)
+        old = rfi.assigned_to
         rfi.assigned_to = new_user
         rfi.save(update_fields=["assigned_to"])
+        ActivityLog.objects.create(
+            actor=user,
+            action="ASSIGNMENT_CHANGE",
+            target_content_type=ContentType.objects.get_for_model(RFI),
+            target_object_id=str(rfi.id),
+            notes=f"assigned_to: {getattr(old,'username',old)} -> {new_user.username}",
+        )
         return _render_rfi_row(request, rfi)
 
 
@@ -651,8 +790,36 @@ class RfiInlineNameView(LoginRequiredMixin, View):
         if not (user.is_superuser or user.groups.filter(name__in=["admin", "pic"]).exists() or rfi.assigned_to_id == user.id):
             return HttpResponse("Forbidden", status=403)
         new_name = (request.POST.get("name") or "").strip()
+        old = rfi.name
         rfi.name = new_name
         rfi.save(update_fields=["name"])
+        ActivityLog.objects.create(
+            actor=user,
+            action="FIELD_EDIT",
+            target_content_type=ContentType.objects.get_for_model(RFI),
+            target_object_id=str(rfi.id),
+            notes=f"name: {old} -> {new_name}",
+        )
+        return _render_rfi_row(request, rfi)
+
+
+class RfiInlineNumberView(LoginRequiredMixin, View):
+    def post(self, request: HttpRequest, pk: str) -> HttpResponse:
+        rfi = get_object_or_404(RFI, pk=pk)
+        user = request.user
+        if not (user.is_superuser or user.groups.filter(name__in=["admin", "pic"]).exists() or rfi.assigned_to_id == user.id):
+            return HttpResponse("Forbidden", status=403)
+        new_no = (request.POST.get("rfi_number") or "").strip()
+        old = rfi.rfi_number
+        rfi.rfi_number = new_no
+        rfi.save(update_fields=["rfi_number"])
+        ActivityLog.objects.create(
+            actor=user,
+            action="FIELD_EDIT",
+            target_content_type=ContentType.objects.get_for_model(RFI),
+            target_object_id=str(rfi.id),
+            notes=f"rfi_number: {old} -> {new_no}",
+        )
         return _render_rfi_row(request, rfi)
 
 
@@ -678,6 +845,12 @@ class SubmittalUpdateView(LoginRequiredMixin, View):
             return HttpResponse("Forbidden", status=403)
         form = SubmittalForm(request.POST, instance=obj)
         if form.is_valid():
-            form.save()
+            if "recalc_due" in request.POST and form.cleaned_data.get("date_received"):
+                from catrack.business_days import add_business_days
+                obj = form.save(commit=False)
+                obj.due_date = add_business_days(obj.date_received, 5)
+                obj.save()
+            else:
+                form.save()
             return redirect("ui:submittal-detail", pk=obj.id)
         return render(request, self.template_name, {"form": form, "obj": obj})

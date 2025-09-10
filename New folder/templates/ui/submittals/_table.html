@@ -8,6 +8,7 @@
           hx-get="{% if ordering == 'due_date' %}?ordering=-due_date{% else %}?ordering=due_date{% endif %}"
           hx-push-url="true">Due Date</a>
       </th>
+      <th>Spec Section</th>
       <th>Status</th>
       <th>Returned Date</th>
       <th>Assigned PM</th>
@@ -18,7 +19,7 @@
     {% for s in object_list %}
       {% include 'ui/submittals/_row.html' %}
     {% empty %}
-      <tr><td colspan="7">No submittals found.</td></tr>
+      <tr><td colspan="8">No submittals found.</td></tr>
     {% endfor %}
   </tbody>
 </table>

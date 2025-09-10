@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>New Project</h1>
+<h1>Edit Project {{ obj.number }} — {{ obj.name }}</h1>
 <div class="form-card" style="max-width:900px;">
   <form method="post" class="form-grid form-2">
     {% csrf_token %}
@@ -11,7 +11,15 @@
       <label class="form-field"><span class="caption">Principals</span>{{ form.principals }}</label>
       <label class="form-field"><span class="caption">Active</span>{{ form.active }}</label>
     </div>
-    <div class="form-actions"><button class="btn btn-primary" type="submit">Create Project</button></div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Save</button>
+      {% if obj.active %}
+      <button class="btn btn-ghost" type="submit" name="archive" value="1">Archive</button>
+      {% else %}
+      <button class="btn btn-ghost" type="submit" name="unarchive" value="1">Unarchive</button>
+      {% endif %}
+      <a class="btn btn-ghost" href="{% url 'ui:projects' %}">Cancel</a>
+    </div>
   </form>
   {% if form.errors %}
     <div class="overdue" style="margin-top:8px;">Please fix the errors above.</div>
