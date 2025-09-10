@@ -1,0 +1,34 @@
+<table>
+  <thead>
+    <tr>
+      <th>RFI No</th>
+      <th>Name</th>
+      <th>Project</th>
+      <th>
+        <a
+          hx-get="{% if ordering == 'due_date' %}?ordering=-due_date{% else %}?ordering=due_date{% endif %}"
+          hx-push-url="true">Due Date</a>
+      </th>
+      <th>Status</th>
+      <th>Returned Date</th>
+      <th>Assigned To</th>
+      <th>Originator</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in object_list %}
+      {% include 'ui/rfis/_row.html' %}
+    {% empty %}
+      <tr><td colspan="8">No RFIs found.</td></tr>
+    {% endfor %}
+  </tbody>
+  </table>
+  <div class="pagination">
+    {% if page_obj.has_previous %}
+      <a hx-get="?page={{ page_obj.previous_page_number }}&ordering={{ ordering }}" hx-push-url="true">Previous</a>
+    {% endif %}
+    <span>Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+      <a hx-get="?page={{ page_obj.next_page_number }}&ordering={{ ordering }}" hx-push-url="true">Next</a>
+    {% endif %}
+  </div>

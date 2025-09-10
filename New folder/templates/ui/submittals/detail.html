@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Submittal {{ obj.submittal_id }}</h1>
+
+<div class="grid" style="grid-template-columns: 2fr 1fr;">
+  <div class="card">
+    <table>
+      <tr><th>Name</th><td>{{ obj.name|default:'—' }}</td></tr>
+      <tr><th>Project</th><td>{{ obj.project.number }} — {{ obj.project.name }}</td></tr>
+      <tr><th>Spec Section</th><td>{{ obj.spec_section }}</td></tr>
+      <tr><th>Description</th><td>{{ obj.description }}</td></tr>
+      <tr><th>Assigned PM</th><td>{{ obj.assigned_pm.get_full_name|default:obj.assigned_pm.username }}</td></tr>
+      <tr><th>Originator</th><td>{{ obj.originator }}</td></tr>
+      <tr><th>Date Received</th><td>{{ obj.date_received }}</td></tr>
+      <tr><th>Date Logged</th><td>{{ obj.date_logged }}</td></tr>
+      <tr><th>Due Date</th><td>{% if obj.is_overdue %}<span class="overdue">{{ obj.due_date }}</span>{% else %}{{ obj.due_date }}{% endif %}</td></tr>
+      <tr><th>Date Returned</th><td>{{ obj.date_returned|default:'—' }}</td></tr>
+      <tr><th>Notes</th><td>{{ obj.notes|default:'—' }}</td></tr>
+      <tr>
+        <th>External Folder</th>
+        <td>
+          <div>Submittals: <code>{{ ext_submittals_path }}</code> 
+            <a href="{{ ext_submittals_url }}" target="_blank" rel="noreferrer">Open</a>
+            <button type="button" onclick="navigator.clipboard.writeText('{{ ext_submittals_path }}')">Copy</button>
+          </div>
+          <div>RFIs: <code>{{ ext_rfis_path }}</code>
+            <a href="{{ ext_rfis_url }}" target="_blank" rel="noreferrer">Open</a>
+            <button type="button" onclick="navigator.clipboard.writeText('{{ ext_rfis_path }}')">Copy</button>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div id="status-block" hx-swap="outerHTML">
+      {% include 'ui/submittals/_status_block.html' %}
+    </div>
+    <div style="margin-top:8px; display:flex; gap:12px; align-items:center;">
+      <a href="/submittals/">Back to list</a>
+      {% if can_edit_submittal %}
+        <a href="{% url 'ui:submittal-edit' obj.id %}">Edit</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:12px;">
+  <h3>Activity</h3>
+  <table>
+    <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>From</th><th>To</th><th>Notes</th></tr></thead>
+    <tbody>
+      {% for a in activity %}
+        <tr>
+          <td>{{ a.created_at }}</td>
+          <td>{{ a.actor.get_full_name|default:a.actor.username }}</td>
+          <td>{{ a.action }}</td>
+          <td>{{ a.from_status|default:'—' }}</td>
+          <td>{{ a.to_status|default:'—' }}</td>
+          <td>{{ a.notes|default:'—' }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">No activity yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

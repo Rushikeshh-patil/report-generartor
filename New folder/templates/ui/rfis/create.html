@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>New RFI</h1>
+<div class="card" style="max-width:800px;">
+  <form method="post">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <label>RFI No {{ form.rfi_number }}</label>
+      <label>Project {{ form.project }}</label>
+      <div id="assigned-to-block" class="card" style="grid-column: span 1; padding:4px;">
+        <em>Select a project to populate assignees.</em>
+      </div>
+      <div hx-get="{% url 'ui:rfi-assigned-to-partial' %}"
+           hx-trigger="load, change from:#id_project" hx-target="#assigned-to-block" hx-include="#id_project"></div>
+      <label>Originator {{ form.originator }}</label>
+      <label>Date Received {{ form.date_received }}</label>
+      <label>Name {{ form.name }}</label>
+    </div>
+    <div style="margin-top:8px;"><button type="submit">Create</button></div>
+  </form>
+</div>
+{% endblock %}

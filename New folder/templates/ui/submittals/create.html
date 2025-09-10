@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>New Submittal</h1>
+<div class="card" style="max-width:800px;">
+  <form method="post">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <label>Project {{ form.project }}</label>
+      <div id="assigned-pm-block" class="card" style="grid-column: span 1; padding:4px;">
+        <em>Select a project to populate assignees.</em>
+      </div>
+      <div hx-get="{% url 'ui:submittal-assigned-pm-partial' %}"
+           hx-trigger="load, change from:#id_project" hx-target="#assigned-pm-block" hx-include="#id_project"></div>
+      <label>Name {{ form.name }}</label>
+      <label>Spec Section {{ form.spec_section }}</label>
+      <label>Originator {{ form.originator }}</label>
+      <label>Description {{ form.description }}</label>
+      <label>Date Received {{ form.date_received }}</label>
+      <label>Date Logged {{ form.date_logged }}</label>
+      <label>Notes {{ form.notes }}</label>
+    </div>
+    <div style="margin-top:8px;"><button type="submit">Create</button></div>
+  </form>
+</div>
+{% endblock %}

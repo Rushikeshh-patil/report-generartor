@@ -1,0 +1,42 @@
+<div>
+  <div>Status: <span class="badge">{{ obj.get_status_display }}</span></div>
+  <div style="margin-top:8px;">
+    <div style="margin-bottom:6px; display:flex; gap:6px; flex-wrap:wrap;">
+      <form hx-post="{% url 'ui:rfi-transition' obj.id %}" hx-target="#rfi-status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="IN_REVIEW" />
+        <button type="submit">In Review</button>
+      </form>
+      <form hx-post="{% url 'ui:rfi-transition' obj.id %}" hx-target="#rfi-status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="READY_PIC_REVIEW" />
+        <button type="submit">Ready for PIC</button>
+      </form>
+      <form hx-post="{% url 'ui:rfi-transition' obj.id %}" hx-target="#rfi-status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="READY_TO_RETURN" />
+        <button type="submit">Ready to Return</button>
+      </form>
+      <form hx-post="{% url 'ui:rfi-transition' obj.id %}" hx-target="#rfi-status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="RETURNED" />
+        <button type="submit">Returned</button>
+      </form>
+      <form hx-post="{% url 'ui:rfi-transition' obj.id %}" hx-target="#rfi-status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="VOID" />
+        <button type="submit">Void</button>
+      </form>
+    </div>
+    <form hx-post="{% url 'ui:rfi-transition' obj.id %}" hx-target="#rfi-status-block" hx-swap="outerHTML" data-toggle-returned>
+      {% csrf_token %}
+      <label>To Status
+        <select name="to_status">
+          <option value="">-- select --</option>
+          <option value="IN_REVIEW">In Review</option>
+          <option value="READY_PIC_REVIEW">Ready for PIC Review</option>
+          <option value="READY_TO_RETURN">Ready to Return</option>
+          <option value="RETURNED">Returned</option>
+          <option value="VOID">Void</option>
+        </select>
+      </label>
+      <label data-returned-date style="display:none;">Returned Date <input type="date" name="date_returned" /></label>
+      <button type="submit">Apply</button>
+    </form>
+  </div>
+</div>

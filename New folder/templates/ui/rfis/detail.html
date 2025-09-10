@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>RFI {{ obj.rfi_id }}</h1>
+
+<div class="grid" style="grid-template-columns: 2fr 1fr;">
+  <div class="card">
+    <table>
+      <tr><th>Project</th><td>{{ obj.project.number }} — {{ obj.project.name }}</td></tr>
+      <tr><th>RFI No</th><td>{{ obj.rfi_number|default:'—' }}</td></tr>
+      <tr><th>Assigned To</th><td>{{ obj.assigned_to.get_full_name|default:obj.assigned_to.username }}</td></tr>
+      <tr><th>Originator</th><td>{{ obj.originator }}</td></tr>
+      <tr><th>Date Received</th><td>{{ obj.date_received }}</td></tr>
+      <tr><th>Due Date</th><td>{% if obj.is_overdue %}<span class="overdue">{{ obj.due_date }}</span>{% else %}{{ obj.due_date }}{% endif %}</td></tr>
+      <tr><th>Returned Date</th><td>{{ obj.date_responded|default:'—' }}</td></tr>
+      <tr><th>Name</th><td>{{ obj.name }}</td></tr>
+    </table>
+</div>
+
+<div class="card" style="margin-top:12px;">
+  <h3>Activity</h3>
+  <table>
+    <thead><tr><th>When</th><th>Actor</th><th>Action</th><th>From</th><th>To</th><th>Notes</th></tr></thead>
+    <tbody>
+      {% for a in activity %}
+        <tr>
+          <td>{{ a.created_at }}</td>
+          <td>{{ a.actor.get_full_name|default:a.actor.username }}</td>
+          <td>{{ a.action }}</td>
+          <td>{{ a.from_status|default:'—' }}</td>
+          <td>{{ a.to_status|default:'—' }}</td>
+          <td>{{ a.notes|default:'—' }}</td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="6">No activity yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+  <div class="card">
+    <div id="rfi-status-block" hx-swap="outerHTML">
+      {% include 'ui/rfis/_status_block.html' %}
+    </div>
+    <div style="margin-top:8px; display:flex; gap:12px; align-items:center;">
+      <a href="/rfis/">Back to list</a>
+      {% if can_edit_rfi %}
+        <a href="{% url 'ui:rfi-edit' obj.id %}">Edit</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

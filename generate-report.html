@@ -20,12 +20,13 @@
             border-bottom: 2px solid #dbeafe; padding-bottom: 0.75rem; margin-bottom: 1rem;
         }
         .label { display: block; font-weight: 500; color: #475569; margin-bottom: 0.5rem; }
-        .input, .textarea {
+        .input, .textarea, .select {
             width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1;
             border-radius: 0.375rem; transition: border-color 0.2s;
+            background-color: white; /* Ensure select has a white background */
         }
         .textarea { min-height: 100px; }
-        .input:focus, .textarea:focus {
+        .input:focus, .textarea:focus, .select:focus {
             outline: none; border-color: #3b82f6;
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
         }
@@ -68,7 +69,6 @@
         </header>
 
         <div id="formContainer">
-            <!-- Project Information -->
             <div class="input-group">
                 <h3>Project Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -84,22 +84,26 @@
                 </div>
             </div>
 
-            <!-- LCCA Criteria -->
             <div class="input-group">
                 <h3>LCCA Criteria & Alternatives</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div><label class="label" for="studyPeriod">Study Period (Years)</label><input class="input" type="number" id="studyPeriod" value="40"></div>
                     <div><label class="label" for="serviceLife">Service Life (Years)</label><input class="input" type="number" id="serviceLife" value="15"></div>
+                    <div><label class="label" for="discountRate">Discount Rate (%)</label><input class="input" type="number" step="0.01" id="discountRate" value="3.00"></div>
                     <div><label class="label" for="electricityRate">Electricity Rate ($/kWh)</label><input class="input" type="number" step="0.001" id="electricityRate"></div>
                     <div><label class="label" for="gasRate">Gas Rate ($/Therm)</label><input class="input" type="number" step="0.001" id="gasRate"></div>
-                    <div><label class="label" for="numAlternatives">Number of Alternatives</label><input class="input" type="number" id="numAlternatives" value="1" min="1" max="5"></div>
+                    <div><label class="label" for="numAlternatives">Number of Alternatives</label><input class="input" type="number" id="numAlternatives" value="2" min="1" max="5"></div>
+                    <div class="lg:col-span-3"><label class="label" for="softwareSelection">Calculation Software & Methodology</label>
+                        <select id="softwareSelection" class="select">
+                            <option value="ufc">BLCC with Energy Pro (in accordance with UFC)</option>
+                            <option value="eplus">BLCC with EnergyPlus Advanced Simulation</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <!-- Dynamic Alternatives Container -->
             <div id="alternativesContainer"></div>
 
-            <!-- Actions -->
             <div class="text-center my-8 flex justify-center gap-4">
                 <button id="generateBtn" class="btn btn-primary text-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 18v-6"></path><path d="m9 15 3 3 3-3"></path></svg>
@@ -143,6 +147,11 @@
             for (let i = 0; i < count; i++) {
                 const altData = data[i] || {};
                 const isBase = i === 0;
+                const paybackFields = !isBase ? `
+                    <div><label class="label">Simple Payback (Years)</label><input class="input alt-simplePayback" type="number" step="0.1" value="${altData.simplePayback || ''}"></div>
+                    <div><label class="label">Discounted Payback (Years)</label><input class="input alt-discountedPayback" type="number" step="0.1" value="${altData.discountedPayback || ''}"></div>
+                ` : '';
+
                 const altHtml = `
                     <div class="input-group alternative-group">
                         <h3 class="text-xl font-semibold text-blue-800 border-b-0 pb-0 mb-4">${isBase ? `Alternative ${i + 1} (Base Model)` : `Alternative ${i + 1}`}</h3>
@@ -161,6 +170,7 @@
                             <div><label class="label">Total Life Cycle Cost ($)</label><input class="input alt-lcc" type="number" value="${altData.lcc || ''}"></div>
                             <div><label class="label">Annual Energy (kWh)</label><input class="input alt-energyKwh" type="number" value="${altData.energyKwh || ''}"></div>
                             <div><label class="label">Annual Energy (Therms)</label><input class="input alt-energyTherm" type="number" value="${altData.energyTherm || ''}"></div>
+                            ${paybackFields}
                         </div>
                     </div>`;
                 alternativesContainer.insertAdjacentHTML('beforeend', altHtml);
@@ -173,15 +183,21 @@
             
             const alternatives = [];
             document.querySelectorAll('.alternative-group').forEach(group => {
+                const getAltNum = (selector) => {
+                    const el = group.querySelector(selector);
+                    return el ? parseFloat(el.value) || 0 : 0;
+                }
                 alternatives.push({
                     name: group.querySelector('.alt-name').value,
                     desc: group.querySelector('.alt-desc').value,
-                    initialCost: parseFloat(group.querySelector('.alt-initialCost').value) || 0,
-                    maintenanceCost: parseFloat(group.querySelector('.alt-maintenanceCost').value) || 0,
-                    replacementCost: parseFloat(group.querySelector('.alt-replacementCost').value) || 0,
-                    energyKwh: parseFloat(group.querySelector('.alt-energyKwh').value) || 0,
-                    energyTherm: parseFloat(group.querySelector('.alt-energyTherm').value) || 0,
-                    lcc: parseFloat(group.querySelector('.alt-lcc').value) || 0,
+                    initialCost: getAltNum('.alt-initialCost'),
+                    maintenanceCost: getAltNum('.alt-maintenanceCost'),
+                    replacementCost: getAltNum('.alt-replacementCost'),
+                    energyKwh: getAltNum('.alt-energyKwh'),
+                    energyTherm: getAltNum('.alt-energyTherm'),
+                    lcc: getAltNum('.alt-lcc'),
+                    simplePayback: getAltNum('.alt-simplePayback'),
+                    discountedPayback: getAltNum('.alt-discountedPayback'),
                 });
             });
 
@@ -195,7 +211,9 @@
                 },
                 criteria: {
                     studyPeriod: getNum('studyPeriod'), serviceLife: getNum('serviceLife'),
-                    electricityRate: getNum('electricityRate'), gasRate: getNum('gasRate')
+                    electricityRate: getNum('electricityRate'), gasRate: getNum('gasRate'),
+                    discountRate: getNum('discountRate'),
+                    softwareSelection: getVal('softwareSelection'),
                 },
                 alternatives: alternatives
             };
@@ -222,14 +240,23 @@
                          return;
                     }
                 }
-
+                
+                // Define conditional text based on software selection
+                let approachText, softwareText;
+                if (data.criteria.softwareSelection === 'ufc') {
+                    approachText = `The LCCA was prepared in accordance with appropriate UFCs. The objective is to determine the lowest cost HVAC system within the given parameters. The LCCA was performed for a period of ${data.criteria.studyPeriod} years per UFC 1-200-02. Per ASHRAE comparison of service life estimates period of equipment/technology life is to be set at ${data.criteria.serviceLife} years. Since all alternates have the same estimated life, the residual or salvage values are set at 0.`;
+                    softwareText = "The LCCA was preformed using the National Institute of Standards and Technology (NIST) Building Life Cycle Costing (BLCC) program in accordance with the FC 1-300-09N, UFC 1-200-02, and UFC 3-410-01. The energy performance of each proposed HVAC system was calculated using EnergyPro Building Energy Analysis Software developed by EnergySoft.";
+                } else { // 'eplus'
+                    approachText = `This life cycle cost analysis (LCCA) was completed to evaluate heating, ventilating, and air conditioning (HVAC) system alternatives to determine the most economical solution. The analysis evaluates initial costs, utility costs, maintenance & repair costs, and appropriate replacement costs over a ${data.criteria.studyPeriod}-year study period with a service life of ${data.criteria.serviceLife} years for major equipment.`;
+                    softwareText = "The LCCA was performed using the National Institute of Standards and Technology (NIST) Building Life Cycle Costing (BLCC) program. The energy performance of each proposed HVAC system was calculated using advanced building energy modeling with the EnergyPlus™ simulation engine.";
+                }
 
                 const optimalSystem = data.alternatives.reduce((prev, current) => (prev.lcc < current.lcc) ? prev : current);
                 const today = new Date();
                 const datePrepared = today.toLocaleString('en-US', { month: 'long', year: 'numeric' });
                 const fullDate = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
                 const format = (num) => num.toLocaleString('en-US');
-                const formatCurrency = (num) => `$ ${format(num)}`;
+                const formatCurrency = (num) => `$ ${format(Math.round(num))}`;
 
                 const emptyLine = new Paragraph("");
                 const pageBreak = new Paragraph({ children: [new PageBreak()] });
@@ -243,6 +270,8 @@
                         })),
                     })),
                 });
+                
+                const alternativesWithPayback = data.alternatives.slice(1);
 
                 const doc = new Document({
                     styles: {
@@ -284,32 +313,32 @@
                             new Paragraph({ style: "toc", children: [new TextRun("APPENDICES")] }),
                             pageBreak,
                             new Paragraph({ text: "1.0 Executive Summary", heading: HeadingLevel.HEADING_1 }),
-                            new Paragraph({ text: `The calculations and analysis performed indicate that the ${optimalSystem.name} system has the lowest life cycle cost over a ${data.criteria.studyPeriod}-year analysis period. This Life Cycle Cost Analysis provides the following Total Life Cycle Costs for the base system and the two alternate HVAC Systems:`, style: "normal" }),
+                            new Paragraph({ text: `The calculations and analysis performed indicate that the ${optimalSystem.name} system has the lowest life cycle cost over a ${data.criteria.studyPeriod}-year analysis period. This Life Cycle Cost Analysis provides the following Total Life Cycle Costs for the base system and the alternate HVAC Systems:`, style: "normal" }),
                             emptyLine,
                             createStyledTable([["HVAC SYSTEM", `TOTAL LIFE CYCLE COST (${data.criteria.studyPeriod}-YEAR)`], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.lcc)])]),
                             pageBreak,
                             new Paragraph({ text: "2.0 Introduction", heading: HeadingLevel.HEADING_1 }),
                             new Paragraph({ text: "2.1 Problem Statement", heading: HeadingLevel.HEADING_2 }),
-                            new Paragraph({ text: `This life cycle cost analysis (LCCA) was completed to evaluate three heating, ventilating, and air conditioning (HVAC) systems alternatives to determine which system provided the most economical solution while evaluating initial costs, utility costs, maintenance & repair costs, and appropriate replacement costs.`, style: "normal" }),
+                            new Paragraph({ text: `This life cycle cost analysis (LCCA) was completed to evaluate heating, ventilating, and air conditioning (HVAC) systems alternatives to determine which system provided the most economical solution while evaluating initial costs, utility costs, maintenance & repair costs, and appropriate replacement costs.`, style: "normal" }),
                             new Paragraph({ text: "2.2 Approach", heading: HeadingLevel.HEADING_2 }),
-                            new Paragraph({ text: `The LCCA was prepared in accordance with appropriate UFCs. The objective is to determine the lowest cost HVAC system within the given parameters. The LCCA was performed for a period of ${data.criteria.studyPeriod} years per UFC 1-200-02. Per ASHRAE comparison of service life estimates period of equipment/technology life is to be set at ${data.criteria.serviceLife} years. Since all alternates have the same estimated life, the residual or salvage values are set at 0.`, style: "normal" }),
+                            new Paragraph({ text: approachText, style: "normal" }),
                             new Paragraph({ text: "2.3 Building Information", heading: HeadingLevel.HEADING_2 }),
                             new Paragraph({ text: data.project.buildingInfo, style: "normal" }),
                             new Paragraph({ text: "2.4 Applicable Codes and Standards", heading: HeadingLevel.HEADING_2 }),
-                            new Paragraph({ text: "The project scope of work, including referenced UFCs, must be adhered to in the design, and these calculations.", style: "normal" }),
+                            new Paragraph({ text: "The project scope of work, including referenced codes and standards, must be adhered to in the design, and these calculations.", style: "normal" }),
                             new Paragraph({ text: "2.5 Calculation Software", heading: HeadingLevel.HEADING_2 }),
-                            new Paragraph({ text: "The LCCA was preformed using the National Institute of Standards and Technology (NIST) Building Life Cycle Costing (BLCC) program in accordance with the FC 1-300-09N, UFC 1-200-02, and UFC 3-410-01. The energy performance of each proposed HVAC system was calculated using EnergyPro Building Energy Analysis Software developed by EnergySoft.", style: "normal" }),
+                            new Paragraph({ text: softwareText, style: "normal" }),
                             pageBreak,
                             new Paragraph({ text: "3.0 HVAC System Alternatives", heading: HeadingLevel.HEADING_1 }),
-                            ...data.alternatives.flatMap((alt, i) => [ new Paragraph({ text: `3.${i+1} ${i === 0 ? 'Base Model' : `Alternate #${i}`}: ${alt.name}`, heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: alt.desc, style: "normal" }), emptyLine ]),
+                            ...data.alternatives.flatMap((alt, i) => [ new Paragraph({ text: `3.${i+1} ${i === 0 ? 'Base Model' : `Alternate #${i+1}`}: ${alt.name}`, heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: alt.desc, style: "normal" }), emptyLine ]),
                             pageBreak,
                             new Paragraph({ text: "4.0 LCCA Criteria", heading: HeadingLevel.HEADING_1 }),
                             new Paragraph({ text: "4.1 Schedule / Life", heading: HeadingLevel.HEADING_2 }),
                             createStyledTable([["ITEM", "DATE / TIME PERIOD"], ["Base Date", fullDate], ["Study Period", `${data.criteria.studyPeriod} Years`], ["Service Life", `${data.criteria.serviceLife} Years`]]),
-                            new Paragraph({ text: "4.2 Initial Costs", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: "4.2 Economic Factors", heading: HeadingLevel.HEADING_2 }),
+                            createStyledTable([["ITEM", "VALUE"], ["Discount Rate", `${data.criteria.discountRate.toFixed(2)}%`], ["Electricity", `$${data.criteria.electricityRate} / kWh`], ["Gas", `$${data.criteria.gasRate} / Therm`]]),
+                            new Paragraph({ text: "4.3 Initial Costs", heading: HeadingLevel.HEADING_2 }),
                             createStyledTable([["HVAC SYSTEM", "INITIAL CONSTRUCTION COST"], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.initialCost)])]),
-                            new Paragraph({ text: "4.3 Utility Costs", heading: HeadingLevel.HEADING_2 }),
-                            createStyledTable([["UTILITY", "RATES"], ["Electricity", `$${data.criteria.electricityRate} / kWh`], ["Gas", `$${data.criteria.gasRate} / Therm`]]),
                             new Paragraph({ text: "4.4 Maintenance and Repair Costs", heading: HeadingLevel.HEADING_2 }),
                             createStyledTable([["HVAC SYSTEM", "ANNUAL COST"], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.maintenanceCost)])]),
                             new Paragraph({ text: "4.5 Replacement Costs", heading: HeadingLevel.HEADING_2 }),
@@ -318,15 +347,21 @@
                             createStyledTable([["HVAC SYSTEM", "Energy Use (KWH)", "Energy Use (Therms)"], ...data.alternatives.map(alt => [alt.name, format(alt.energyKwh), format(alt.energyTherm)])]),
                             pageBreak,
                             new Paragraph({ text: "5.0 LCCA Results", heading: HeadingLevel.HEADING_1 }),
-                            new Paragraph({ text: "5.1 LCCA", heading: HeadingLevel.HEADING_2 }),
-                            new Paragraph({ text: "The use of the NIST BLCC software in development of this LCCA with the aforementioned study period, initial costs, utility costs, maintenance & repair costs, and energy costs, established the results in the summary provided in Appendices C and D.", style: "normal" }),
-                            new Paragraph({ text: "5.2 Optimal HVAC System Alternate", heading: HeadingLevel.HEADING_2 }),
-                            new Paragraph({ text: `Of the HVAC system alternates analyzed for the DAC, the ${optimalSystem.name} system is the optimal choice over the ${data.criteria.studyPeriod}-year life.`, style: "normal" }),
-                            emptyLine,
+                            new Paragraph({ text: "5.1 LCCA Summary", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: "The use of the NIST BLCC software in development of this LCCA with the aforementioned study period, initial costs, utility costs, maintenance & repair costs, and energy costs, established the results in the summary provided below and detailed in Appendices C and D.", style: "normal" }),
+                             emptyLine,
                             createStyledTable([["HVAC SYSTEM", `TOTAL LIFE CYCLE COST (${data.criteria.studyPeriod}-YEAR)`], ...data.alternatives.map(alt => [alt.name, formatCurrency(alt.lcc)])]),
+                            ...(alternativesWithPayback.length > 0 ? [
+                                emptyLine,
+                                new Paragraph({ text: "5.2 Payback Analysis", heading: HeadingLevel.HEADING_2 }),
+                                createStyledTable([["HVAC SYSTEM", `SIMPLE PAYBACK (YEARS)`, `DISCOUNTED PAYBACK (YEARS)`], ...alternativesWithPayback.map(alt => [alt.name, alt.simplePayback, alt.discountedPayback])]),
+                            ] : []),
+                            emptyLine,
+                            new Paragraph({ text: "5.3 Optimal HVAC System Alternate", heading: HeadingLevel.HEADING_2 }),
+                            new Paragraph({ text: `Of the HVAC system alternates analyzed, the ${optimalSystem.name} system is the optimal choice over the ${data.criteria.studyPeriod}-year life based on the lowest total life cycle cost.`, style: "normal" }),
                             pageBreak,
                             new Paragraph({ text: "APPENDICES", heading: HeadingLevel.HEADING_1 }),
-                            ...data.alternatives.flatMap((alt, i) => [ new Paragraph({ text: `Appendix A${i+1} | Energy Usage – ${i === 0 ? 'Base' : `Alternate #${i}`}`, heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: `[Placeholder: Insert EnergyPro summary image for ${alt.name} here]`, style: "normal" }), emptyLine ]),
+                            ...data.alternatives.flatMap((alt, i) => [ new Paragraph({ text: `Appendix A${i+1} | Energy Usage – ${i === 0 ? 'Base' : `Alternate #${i+1}`}`, heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: `[Placeholder: Insert EnergyPro summary image for ${alt.name} here]`, style: "normal" }), emptyLine ]),
                             new Paragraph({ text: "Appendix B | Comparison of service life estimates", heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: "[Placeholder: Insert service life comparison data here]", style: "normal" }), emptyLine,
                             new Paragraph({ text: "Appendix C | NIST Lowest LCC Report", heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: "[Placeholder: Insert NIST Lowest LCC Report image here]", style: "normal" }), emptyLine,
                             new Paragraph({ text: "Appendix D | NIST BLCC Summary", heading: HeadingLevel.HEADING_2 }), new Paragraph({ text: "[Placeholder: Insert NIST BLCC Summary image here]", style: "normal" }), emptyLine,
@@ -381,7 +416,7 @@
                 
                 renderAlternatives(data.numAlternatives || 1, data.alternatives);
             } else {
-                renderAlternatives(1);
+                renderAlternatives(numAlternativesInput.value || 2);
             }
         }
     </script>

@@ -1,0 +1,12 @@
+{% if project %}
+  <div>
+    <label>Assigned PM {{ form.assigned_pm }}</label>
+    <div style="margin-top:4px; font-size: 12px; color:#444;">
+      <div>Project Managers: {% for u in project.managers.all %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</div>
+      <div>PICs: {% for u in project.principals.all %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</div>
+    </div>
+  </div>
+{% else %}
+  <em>Select a project to populate assignees.</em>
+{% endif %}
+

@@ -1,0 +1,34 @@
+<table>
+  <thead>
+    <tr>
+      <th>Number</th>
+      <th>Name</th>
+      <th>Active</th>
+      <th>Managers</th>
+      <th>Principals</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for project in object_list %}
+      <tr>
+        <td>{{ project.number }}</td>
+        <td>{{ project.name }}</td>
+        <td>{{ project.active|yesno:"Yes,No" }}</td>
+        <td>{% for u in project.managers.all %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+        <td>{% for u in project.principals.all %}{{ u.get_full_name|default:u.username }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="5">No projects found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<div class="pagination">
+  {% if page_obj.has_previous %}
+    <a hx-get="?page={{ page_obj.previous_page_number }}" hx-push-url="true">Previous</a>
+  {% endif %}
+  <span>Page {{ page_obj.number }} of {{ paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a hx-get="?page={{ page_obj.next_page_number }}" hx-push-url="true">Next</a>
+  {% endif %}
+</div>
+

@@ -139,6 +139,7 @@ class ReportGeneratorView(View):
                     # --- 4a. Generate Appendix Table of Contents Page ---
                     toc_html_parts = [
                         '<html><head><style>',
+                        '@page { size: letter; margin: 0.75in; }',
                         'body { font-family: "%s", sans-serif; }' % style_context['font_family'],
                         '.new-page { page-break-before: always; }',
                         'h1 { color: %s; font-size: 24pt; }' % style_context['heading_color'],
@@ -162,6 +163,7 @@ class ReportGeneratorView(View):
                         sanitized_title = sanitize_filename(title)
                         cover_html_parts = [
                             '<html><head><style>',
+                            '@page { size: letter; margin: 0.75in; }',
                             'body { font-family: "%s", sans-serif; }' % style_context['font_family'],
                             '.cover { display: flex; align-items: center; justify-content: center; height: 100vh; page-break-before: always; }',
                             'h1 { font-size: 28pt; color: %s; }' % style_context['heading_color'],

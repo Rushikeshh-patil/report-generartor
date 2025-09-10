@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>New Project</h1>
+<div class="card" style="max-width:800px;">
+  <form method="post">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <label>Project Number {{ form.number }}</label>
+      <label>Project Name {{ form.name }}</label>
+      <label>Managers {{ form.managers }}</label>
+      <label>Principals {{ form.principals }}</label>
+      <label>Active {{ form.active }}</label>
+    </div>
+    <div style="margin-top:8px;"><button type="submit">Create Project</button></div>
+  </form>
+  {% if form.errors %}
+    <div class="overdue" style="margin-top:8px;">Please fix the errors above.</div>
+  {% endif %}
+</div>
+{% endblock %}
+

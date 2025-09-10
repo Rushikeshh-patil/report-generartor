@@ -1,0 +1,57 @@
+<tr id="row-{{ r.id }}">
+  <td><a href="{% url 'ui:rfi-detail' r.id %}">{{ r.rfi_number|default:'—' }}</a></td>
+  <td>
+    <form>
+      {% csrf_token %}
+      <input type="text" name="name" value="{{ r.name }}"
+             hx-post="{% url 'ui:rfi-inline-name' r.id %}"
+             hx-target="#row-{{ r.id }}" hx-swap="outerHTML"
+             placeholder="(no name)" style="width: 16em;" />
+    </form>
+  </td>
+  <td>{{ r.project.number }} — {{ r.project.name }}</td>
+  <td>{% if r.is_overdue %}<span class="overdue">{{ r.due_date }}</span>{% else %}{{ r.due_date }}{% endif %}</td>
+  <td>
+    <form>
+      {% csrf_token %}
+      <select name="to_status"
+              hx-post="{% url 'ui:rfi-inline-status' r.id %}"
+              hx-target="#row-{{ r.id }}" hx-swap="outerHTML" hx-trigger="change">
+        <option value="IN_REVIEW" {% if r.status == 'IN_REVIEW' %}selected{% endif %}>In Review</option>
+        <option value="READY_PIC_REVIEW" {% if r.status == 'READY_PIC_REVIEW' %}selected{% endif %}>Ready for PIC Review</option>
+        <option value="READY_TO_RETURN" {% if r.status == 'READY_TO_RETURN' %}selected{% endif %}>Ready to Return</option>
+        <option value="RETURNED" {% if r.status == 'RETURNED' %}selected{% endif %}>Returned</option>
+        <option value="VOID" {% if r.status == 'VOID' %}selected{% endif %}>Void</option>
+      </select>
+    </form>
+  </td>
+  <td>
+    {% if r.status == 'RETURNED' %}
+      <form hx-post="{% url 'ui:rfi-inline-status' r.id %}"
+            hx-target="#row-{{ r.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="to_status" value="RETURNED" />
+        <input type="date" name="date_returned" value="{{ r.date_responded|date:'Y-m-d' }}" style="width: 10.5em;" onchange="this.form.requestSubmit();" />
+      </form>
+    {% else %}
+      —
+    {% endif %}
+  </td>
+  <td>
+    {% if can_assign %}
+      <form>
+        {% csrf_token %}
+        <select name="assigned_to"
+                hx-post="{% url 'ui:rfi-inline-assign' r.id %}"
+                hx-target="#row-{{ r.id }}" hx-swap="outerHTML" hx-trigger="change">
+          {% for u in users %}
+            <option value="{{ u.id }}" {% if r.assigned_to_id == u.id %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    {% else %}
+      {{ r.assigned_to.get_full_name|default:r.assigned_to.username }}
+    {% endif %}
+  </td>
+  <td>{{ r.originator }}</td>
+</tr>

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Edit Submittal {{ obj.submittal_id }}</h1>
+<div class="card" style="max-width:900px;">
+  <form method="post">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <label>Project {{ form.project }}</label>
+      <label>Assigned PM {{ form.assigned_pm }}</label>
+      <label>Name {{ form.name }}</label>
+      <label>Spec Section {{ form.spec_section }}</label>
+      <label>Originator {{ form.originator }}</label>
+      <label>Description {{ form.description }}</label>
+      <label>Date Received {{ form.date_received }}</label>
+      <label>Date Logged {{ form.date_logged }}</label>
+      <label>Notes {{ form.notes }}</label>
+    </div>
+    <div style="margin-top:8px; display:flex; gap:12px;">
+      <button type="submit">Save</button>
+      <a href="{% url 'ui:submittal-detail' obj.id %}">Cancel</a>
+    </div>
+  </form>
+  {% if form.errors %}
+    <div class="overdue" style="margin-top:8px;">Please fix the errors above.</div>
+  {% endif %}
+</div>
+{% endblock %}

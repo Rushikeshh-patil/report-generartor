@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Dashboard</h1>
+<div class="grid grid-3">
+  <div class="card">
+    <div>My Submittals</div>
+    <div style="font-size:28px; font-weight:700;">{{ my_assigned_counts.submittals }}</div>
+  </div>
+  <div class="card">
+    <div>My RFIs</div>
+    <div style="font-size:28px; font-weight:700;">{{ my_assigned_counts.rfis }}</div>
+  </div>
+  <div class="card">
+    <div>Overdue</div>
+    <div><span class="overdue">Submittals: {{ overdue_submittals }}</span></div>
+    <div><span class="overdue">RFIs: {{ overdue_rfis }}</span></div>
+  </div>
+</div>
+
+<h2 style="margin-top:20px;">By Project (Top Open Submittals)</h2>
+<table>
+  <thead>
+    <tr><th>Project</th><th>Open Submittals</th></tr>
+  </thead>
+  <tbody>
+    {% for p in by_project %}
+      <tr>
+        <td>{{ p.project__number }} — {{ p.project__name }}</td>
+        <td>{{ p.open_count }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="2">No data</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+

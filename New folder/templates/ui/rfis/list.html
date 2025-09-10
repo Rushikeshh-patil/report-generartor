@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>RFIs</h1>
+<div style="margin-bottom:8px;">
+  <a href="{% url 'ui:rfi-create' %}">+ New RFI</a>
+  <a href="/api/rfis/export.csv?{{ request.GET.urlencode }}" style="margin-left:12px;">Export CSV</a>
+  <a href="/api/rfis/?{{ request.GET.urlencode }}" style="margin-left:12px;">API</a>
+  </div>
+<div class="filters">
+  <form hx-get="" hx-target="#rfis-table" hx-trigger="change, keyup delay:300ms, submit" hx-push-url="true">
+    <label>RFI No {{ form.rfi_number }}</label>
+    <label>Name {{ form.name }}</label>
+    <label>Project {{ form.project }}</label>
+    <label>Status {{ form.status }}</label>
+    <label>Assigned To {{ form.assigned_to }}</label>
+    <label>Originator {{ form.originator }}</label>
+    <label>Search {{ form.q }}</label>
+    <label>Received From {{ form.date_received_from }}</label>
+    <label>Received To {{ form.date_received_to }}</label>
+    <label>Due From {{ form.due_from }}</label>
+    <label>Due To {{ form.due_to }}</label>
+    <label>Overdue {{ form.overdue }}</label>
+    <button type="submit">Filter</button>
+  </form>
+  <div id="rfis-table" hx-get="" hx-trigger="load">
+    {% include 'ui/rfis/_table.html' %}
+  </div>
+{% endblock %}

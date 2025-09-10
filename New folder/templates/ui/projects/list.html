@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Projects</h1>
+<div style="margin-bottom:8px;">
+  <a href="{% url 'ui:project-create' %}">+ New Project</a>
+  <a href="/api/projects/?{{ request.GET.urlencode }}" style="margin-left:12px;">API</a>
+  </div>
+<div class="filters">
+  <form hx-get="" hx-target="#projects-table" hx-trigger="change, keyup delay:300ms, submit" hx-push-url="true">
+    <label>Search {{ form.q }}</label>
+    <label>Active Only {{ form.active }}</label>
+    <label>Manager {{ form.manager }}</label>
+    <label>Principal {{ form.principal }}</label>
+    <button type="submit">Filter</button>
+  </form>
+  <div id="projects-table" hx-get="" hx-trigger="load">
+    {% include 'ui/projects/_table.html' %}
+  </div>
+{% endblock %}

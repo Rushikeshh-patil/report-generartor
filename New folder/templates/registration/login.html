@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card" style="max-width:420px;margin:40px auto;">
+  <h2>Sign in</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Login</button>
+  </form>
+  {% if form.errors %}
+    <p class="overdue">Please check your username/password.</p>
+  {% endif %}
+{% endblock %}
+

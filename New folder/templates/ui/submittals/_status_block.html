@@ -1,0 +1,40 @@
+<div>
+  <div>Status: <span class="badge">{{ obj.get_status_display }}</span></div>
+  <div style="margin-top:8px;">
+    <div style="margin-bottom:6px; display:flex; gap:6px; flex-wrap:wrap;">
+      <form hx-post="{% url 'ui:submittal-transition' obj.id %}" hx-target="#status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="READY_PIC_REVIEW" />
+        <button type="submit">Mark Ready for PIC</button>
+      </form>
+      <form hx-post="{% url 'ui:submittal-transition' obj.id %}" hx-target="#status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="READY_TO_RETURN" />
+        <button type="submit">Mark Ready to Return</button>
+      </form>
+      <form hx-post="{% url 'ui:submittal-transition' obj.id %}" hx-target="#status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="RETURNED" />
+        <button type="submit">Mark Returned</button>
+      </form>
+      <form hx-post="{% url 'ui:submittal-transition' obj.id %}" hx-target="#status-block" hx-swap="outerHTML">
+        {% csrf_token %}<input type="hidden" name="to_status" value="VOID" />
+        <button type="submit">Void</button>
+      </form>
+    </div>
+    <form hx-post="{% url 'ui:submittal-transition' obj.id %}" hx-target="#status-block" hx-swap="outerHTML" data-toggle-returned>
+      {% csrf_token %}
+      <input type="hidden" name="from_status" value="{{ obj.status }}" />
+      <label>To Status
+        <select name="to_status">
+          <option value="">-- select --</option>
+          <option value="IN_REVIEW">In Review</option>
+          <option value="READY_PIC_REVIEW">Ready for PIC Review</option>
+          <option value="READY_TO_RETURN">Ready to Return</option>
+          <option value="RETURNED">Returned</option>
+          <option value="VOID">Void</option>
+        </select>
+      </label>
+      <label data-returned-date style="display:none;">Date Returned <input type="date" name="date_returned" /></label>
+      <label>Notes <input type="text" name="notes" /></label>
+      <button type="submit">Apply</button>
+    </form>
+  </div>
+</div>

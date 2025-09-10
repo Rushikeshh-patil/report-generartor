@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Edit RFI {{ obj.rfi_number|default:obj.rfi_id }}</h1>
+<div class="card" style="max-width:900px;">
+  <form method="post">
+    {% csrf_token %}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+      <label>Project {{ form.project }}</label>
+      <label>RFI No {{ form.rfi_number }}</label>
+      <label>Assigned To {{ form.assigned_to }}</label>
+      <label>Originator {{ form.originator }}</label>
+      <label>Date Received {{ form.date_received }}</label>
+      <label>Name {{ form.name }}</label>
+    </div>
+    <div style="margin-top:8px; display:flex; gap:12px;">
+      <button type="submit">Save</button>
+      <a href="{% url 'ui:rfi-detail' obj.id %}">Cancel</a>
+    </div>
+  </form>
+  {% if form.errors %}
+    <div class="overdue" style="margin-top:8px;">Please fix the errors above.</div>
+  {% endif %}
+</div>
+{% endblock %}
+

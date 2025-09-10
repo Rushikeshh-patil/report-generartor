@@ -1,0 +1,47 @@
+<tr id="row-{{ s.id }}">
+  <td><a href="{% url 'ui:submittal-detail' s.id %}">{{ s.name|default:s.submittal_id }}</a></td>
+  <td>{{ s.project.number }} — {{ s.project.name }}</td>
+  <td>{% if s.is_overdue %}<span class="overdue">{{ s.due_date }}</span>{% else %}{{ s.due_date }}{% endif %}</td>
+  <td>
+    <form hx-post="{% url 'ui:submittal-inline-status' s.id %}"
+          hx-target="#row-{{ s.id }}" hx-swap="outerHTML" hx-trigger="change">
+      {% csrf_token %}
+      <select name="to_status">
+        <option value="IN_REVIEW" {% if s.status == 'IN_REVIEW' %}selected{% endif %}>In Review</option>
+        <option value="READY_PIC_REVIEW" {% if s.status == 'READY_PIC_REVIEW' %}selected{% endif %}>Ready for PIC Review</option>
+        <option value="READY_TO_RETURN" {% if s.status == 'READY_TO_RETURN' %}selected{% endif %}>Ready to Return</option>
+        <option value="RETURNED" {% if s.status == 'RETURNED' %}selected{% endif %}>Returned</option>
+        <option value="VOID" {% if s.status == 'VOID' %}selected{% endif %}>Void</option>
+      </select>
+    </form>
+  </td>
+  <td>
+    {% if s.status == 'RETURNED' %}
+      <form hx-post="{% url 'ui:submittal-inline-status' s.id %}"
+            hx-target="#row-{{ s.id }}" hx-swap="outerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="to_status" value="RETURNED" />
+        <input type="date" name="date_returned" value="{{ s.date_returned|date:'Y-m-d' }}" style="width: 10.5em;" onchange="this.form.requestSubmit();" />
+      </form>
+    {% else %}
+      —
+    {% endif %}
+  </td>
+  <td>
+    {% if can_assign %}
+      <form>
+        {% csrf_token %}
+        <select name="assigned_pm"
+                hx-post="{% url 'ui:submittal-inline-assign' s.id %}"
+                hx-target="#row-{{ s.id }}" hx-swap="outerHTML" hx-trigger="change">
+          {% for u in users %}
+            <option value="{{ u.id }}" {% if s.assigned_pm_id == u.id %}selected{% endif %}>{{ u.get_full_name|default:u.username }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    {% else %}
+      {{ s.assigned_pm.get_full_name|default:s.assigned_pm.username }}
+    {% endif %}
+  </td>
+  <td>{{ s.originator }}</td>
+</tr>

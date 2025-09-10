@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CA Track</title>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background:#f7f7f8; }
+    header { background:#1f2937; color:#fff; padding: 10px 16px; display:flex; align-items:center; gap:16px; }
+    header a { color:#fff; text-decoration:none; margin-right:12px; }
+    header .spacer { flex:1; }
+    main { padding: 16px; }
+    .card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:12px; }
+    .grid { display:grid; gap:12px; }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    table { width:100%; border-collapse: collapse; background:#fff; }
+    th, td { border-bottom:1px solid #efefef; padding:8px; text-align:left; }
+    th a { color:inherit; text-decoration:none; }
+    .filters { margin-bottom: 12px; }
+    .filters form { display:flex; flex-wrap:wrap; gap:8px; align-items:end; }
+    .filters label { display:flex; flex-direction:column; font-size: 12px; color:#444; }
+    .badge { display:inline-block; padding:2px 6px; border-radius:4px; font-size:12px; background:#eef2ff; color:#3730a3; }
+    .overdue { color:#b91c1c; font-weight:600; }
+    .pagination { margin-top: 8px; display:flex; gap:8px; align-items:center; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/">Dashboard</a>
+    <a href="/projects/">Projects</a>
+    <a href="/submittals/">Submittals</a>
+    <a href="/rfis/">RFIs</a>
+    <div class="spacer"></div>
+    {% if request.user.is_authenticated %}
+      <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+      <a href="/logout/">Logout</a>
+    {% else %}
+      <a href="/login/">Login</a>
+    {% endif %}
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+  <script>
+    function _caToggleReturned(container){
+      try{
+        const select = container.querySelector('select[name="to_status"]');
+        const wrap = container.querySelector('[data-returned-date]');
+        const input = container.querySelector('input[name="date_returned"]');
+        const update = ()=>{
+          const isRet = select && select.value === 'RETURNED';
+          if(wrap){ wrap.style.display = isRet ? '' : 'none'; }
+          if(isRet && input && !input.value){
+            const t=new Date();
+            const m=String(t.getMonth()+1).padStart(2,'0');
+            const d=String(t.getDate()).padStart(2,'0');
+            input.value = `${t.getFullYear()}-${m}-${d}`;
+          }
+        };
+        if(select){ select.addEventListener('change', update); update(); }
+      }catch(e){ /* no-op */ }
+    }
+    function _caToggleResponded(container){
+      try{
+        const select = container.querySelector('select[name="to_status"]');
+        const wrap = container.querySelector('[data-responded-date]');
+        const input = container.querySelector('input[name="date_responded"]');
+        const update = ()=>{
+          const isClosed = select && select.value === 'CLOSED';
+          if(wrap){ wrap.style.display = isClosed ? '' : 'none'; }
+          if(isClosed && input && !input.value){
+            const t=new Date();
+            const m=String(t.getMonth()+1).padStart(2,'0');
+            const d=String(t.getDate()).padStart(2,'0');
+            input.value = `${t.getFullYear()}-${m}-${d}`;
+          }
+        };
+        if(select){ select.addEventListener('change', update); update(); }
+      }catch(e){ /* no-op */ }
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+      document.querySelectorAll('[data-toggle-returned]').forEach(_caToggleReturned);
+      document.querySelectorAll('[data-toggle-responded]').forEach(_caToggleResponded);
+    });
+    document.addEventListener('htmx:afterSwap', function(evt){
+      if(evt.target){
+        evt.target.querySelectorAll('[data-toggle-returned]').forEach(_caToggleReturned);
+        evt.target.querySelectorAll('[data-toggle-responded]').forEach(_caToggleResponded);
+      }
+    });
+  </script>
+</body>
+</html>
